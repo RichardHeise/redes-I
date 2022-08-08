@@ -4,13 +4,17 @@ CFLAGS  = -g
 CC = gcc 
 
 #-----------------------------------------------------------------------------#
-all : ConexaoRawSocket
+all : client server
 
-run: ConexaoRawSocket
-	sudo ./ConexaoRawSocket
+rClient: client
+	sudo ./client
 
-ConexaoRawSocket: ConexaoRawSocket.o
+rServer: server
+	sudo ./server
 
+client: client.o 
+
+server: server.o
 
 #-----------------------------------------------------------------------------#
 
@@ -20,4 +24,4 @@ clean :
 #-----------------------------------------------------------------------------#
 
 purge:
-	$(RM) ConexaoRawSocket *.o
+	$(RM) client server *.o

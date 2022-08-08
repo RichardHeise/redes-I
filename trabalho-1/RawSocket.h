@@ -9,6 +9,17 @@
 #include <string.h>
 #include <stdio.h>
 
+enum fields {
+    INIT_MARKER = 126
+};
+
+typedef __attribute__((__packed__)) struct msg_s {
+    int init_mark : 8;
+    unsigned int size : 6;
+    unsigned int seq : 4;
+    int type : 6;
+    int parity : 8;
+} msg_t;
 
 int ConexaoRawSocket(char *device) {
 
@@ -50,14 +61,4 @@ int ConexaoRawSocket(char *device) {
     }
 
     return soquete;
-}
-
-int main () {
-    int teste = ConexaoRawSocket("lo");
-    unsigned char* batata = "abcdefghijklmno";
-    while (1) {
-        sendto(teste,batata,15,0,NULL,NULL);
-    }
-
-    return 1;
 }
