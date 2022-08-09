@@ -12,9 +12,9 @@ rClient: client
 rServer: server
 	sudo ./server
 
-client: client.o 
+client: client.o RawSocket.o
 
-server: server.o
+server: server.o RawSocket.o
 
 #-----------------------------------------------------------------------------#
 
