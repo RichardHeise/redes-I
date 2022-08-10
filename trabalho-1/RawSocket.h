@@ -26,7 +26,8 @@ enum fields {
     CDL = 36,
     MKDIRL = 37,
     END = 46,
-    MAX_DATA_BYTES = 67
+    MAX_DATA_BYTES = 67,
+    DEFAULT = 69
 };
 
 typedef struct __attribute__((packed)) msg_s {
@@ -34,6 +35,6 @@ typedef struct __attribute__((packed)) msg_s {
     unsigned int size : 6;
     unsigned int seq : 4;
     unsigned int type : 6;
-} msg_t;
+} msgHeader;
 
 int ConexaoRawSocket(char *device);

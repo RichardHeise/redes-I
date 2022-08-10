@@ -4,6 +4,21 @@
 #include <sys/stat.h>
 #include <unistd.h> 
 
+create_msgHeader() {
+    
+}
+
+void remote_mkdir(unsigned char* dir, int type, int* seq) {
+    unsigned char* buf = calloc(DATA_BYTES, sizeof(unsigned char));
+    int recv = DEFAULT;
+    if (*seq == 15) 
+        *seq = 0;
+    else 
+        *seq += 1;
+    
+    create_msgHeader();
+}
+
 void local_mkdir(unsigned char* dir) {
     mkdir(dir, 0700);
 }
@@ -91,7 +106,8 @@ void send_msg(unsigned char* buf) {
     unsigned char* dir = calloc(MAX_DATA_BYTES, sizeof(unsigned char));
     unsigned char* data = calloc(DATA_BYTES, sizeof(unsigned char));
     int type, ls_opts;
-    
+    int seq_counter = 0;
+
     while(1) {
         char rel_path[MAX_DATA_BYTES];
         fprintf(stderr,"%s:\n-> ", getcwd(rel_path, sizeof(rel_path)));
@@ -115,12 +131,13 @@ void send_msg(unsigned char* buf) {
                 local_cd(dir);
                 break;
             case MKDIR:
-                //remote_mkdir();
+                remote_mkdir(dir, type, &seq_counter);
                 break;
             case MKDIRL:
                 local_mkdir(dir);
                 break;
             default:
+                break;
         }
 
         memset(input, 0, MAX_DATA_BYTES);
