@@ -27,7 +27,7 @@ enum fields {
     MKDIRL = 37,
     END = 46,
     MAX_DATA_BYTES = 67,
-    DEFAULT = 69
+    DEFAULT = 666
 };
 
 typedef struct __attribute__((packed)) msg_s {

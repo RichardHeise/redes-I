@@ -4,19 +4,48 @@
 #include <sys/stat.h>
 #include <unistd.h> 
 
-create_msgHeader() {
-    
+void printf_msgHeader(msgHeader* header) {
+    printf(
+        "Init marker: %d\nseq: %d\nsize: %d\ntype: %d\n",
+        header->init_mark, header->seq, header->size, header->type
+    );
 }
 
-void remote_mkdir(unsigned char* dir, int type, int* seq) {
-    unsigned char* buf = calloc(DATA_BYTES, sizeof(unsigned char));
-    int recv = DEFAULT;
+void create_msgHeader(msgHeader* header, int seq, int size, int type) {
+
+    header->init_mark = INIT_MARKER;
+    header->seq = seq;
+    header->size = size;
+    header->type = type;
+
+}
+
+void send_msg(int server, unsigned char* data, int type, int seq) {
+    unsigned char* buf = calloc(MAX_DATA_BYTES, sizeof(unsigned char));
+    msgHeader* header = (msgHeader *)(buf);
+
+    create_msgHeader(header, seq, strlen(data), type);
+
+    int msg_size = sizeof(header)+header->size;
+    int parity = 0;
+
+    for (int i = sizeof(header); i < msg_size; i++) {
+        buf[i] = data[i - sizeof(header)];
+        parity ^= buf[i];
+    }
+
+    buf[MAX_DATA_BYTES-1] = parity;
+    sendto(server, buf, MAX_DATA_BYTES, 0, NULL, 0);
+    free(buf);
+}
+
+void remote_mkdir(int server, unsigned char* dir, int type, int* seq) {
     if (*seq == 15) 
         *seq = 0;
     else 
         *seq += 1;
     
-    create_msgHeader();
+    send_msg(server, dir, type, *seq);
 }
 
 void local_mkdir(unsigned char* dir) {
@@ -101,12 +130,13 @@ int get_type(unsigned char* buf, int *opts, unsigned char* dir) {
         return 0;
 }
 
-void send_msg(unsigned char* buf) {
+void client_controller(int server) {
     unsigned char* input = calloc(MAX_DATA_BYTES, sizeof(unsigned char));
     unsigned char* dir = calloc(MAX_DATA_BYTES, sizeof(unsigned char));
     unsigned char* data = calloc(DATA_BYTES, sizeof(unsigned char));
+
     int type, ls_opts;
-    int seq_counter = 0;
+    int seq_counter = -1;
 
     while(1) {
         char rel_path[MAX_DATA_BYTES];
@@ -131,7 +161,7 @@ void send_msg(unsigned char* buf) {
                 local_cd(dir);
                 break;
             case MKDIR:
-                remote_mkdir(dir, type, &seq_counter);
+                remote_mkdir(server, dir, type, &seq_counter);
                 break;
             case MKDIRL:
                 local_mkdir(dir);
@@ -154,10 +184,8 @@ int main () {
         exit(-1);
     }
 
-    unsigned char *buffer = calloc(MAX_DATA_BYTES, sizeof(unsigned char));
-
     system("clear");
-    send_msg(buffer);
+    client_controller(server);
 
 
     return 1;
