@@ -38,3 +38,11 @@ typedef struct __attribute__((packed)) msg_s {
 } msgHeader;
 
 int ConexaoRawSocket(char *device);
+
+void create_msgHeader(msgHeader* header, int seq, int size, int type);
+
+void printf_msgHeader(msgHeader* header);
+
+void send_msg(int socket, unsigned char* data, int type, int* seq);
+
+void inc_seq(int* counter);

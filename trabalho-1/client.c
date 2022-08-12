@@ -4,48 +4,10 @@
 #include <sys/stat.h>
 #include <unistd.h> 
 
-void printf_msgHeader(msgHeader* header) {
-    printf(
-        "Init marker: %d\nseq: %d\nsize: %d\ntype: %d\n",
-        header->init_mark, header->seq, header->size, header->type
-    );
-}
+int counter_seq = 0;
 
-void create_msgHeader(msgHeader* header, int seq, int size, int type) {
-
-    header->init_mark = INIT_MARKER;
-    header->seq = seq;
-    header->size = size;
-    header->type = type;
-
-}
-
-void send_msg(int server, unsigned char* data, int type, int seq) {
-    unsigned char* buf = calloc(MAX_DATA_BYTES, sizeof(unsigned char));
-    msgHeader* header = (msgHeader *)(buf);
-
-    create_msgHeader(header, seq, strlen(data), type);
-
-    int msg_size = sizeof(header)+header->size;
-    int parity = 0;
-
-    for (int i = sizeof(header); i < msg_size; i++) {
-        buf[i] = data[i - sizeof(header)];
-        parity ^= buf[i];
-    }
-
-    buf[MAX_DATA_BYTES-1] = parity;
-    sendto(server, buf, MAX_DATA_BYTES, 0, NULL, 0);
-    free(buf);
-}
-
-void remote_mkdir(int server, unsigned char* dir, int type, int* seq) {
-    if (*seq == 15) 
-        *seq = 0;
-    else 
-        *seq += 1;
-    
-    send_msg(server, dir, type, *seq);
+void remote_mkdir(int server, unsigned char* dir, int type) {
+    send_msg(server, dir, type, &counter_seq);
 }
 
 void local_mkdir(unsigned char* dir) {
@@ -136,7 +98,6 @@ void client_controller(int server) {
     unsigned char* data = calloc(DATA_BYTES, sizeof(unsigned char));
 
     int type, ls_opts;
-    int seq_counter = -1;
 
     while(1) {
         char rel_path[MAX_DATA_BYTES];
@@ -161,7 +122,7 @@ void client_controller(int server) {
                 local_cd(dir);
                 break;
             case MKDIR:
-                remote_mkdir(server, dir, type, &seq_counter);
+                remote_mkdir(server, dir, type);
                 break;
             case MKDIRL:
                 local_mkdir(dir);

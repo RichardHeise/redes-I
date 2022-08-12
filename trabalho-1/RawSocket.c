@@ -41,3 +41,49 @@ int ConexaoRawSocket(char *device) {
 
     return soquete;
 }
+
+void create_msgHeader(msgHeader* header, int seq, int size, int type) {
+
+    header->init_mark = INIT_MARKER;
+    header->seq = seq;
+    header->size = size;
+    header->type = type;
+
+}
+
+void printf_msgHeader(msgHeader* header) {
+    printf(
+        "Init marker: %d\nseq: %d\nsize: %d\ntype: %d\n",
+        header->init_mark, header->seq, header->size, header->type
+    );
+}
+
+void send_msg(int socket, unsigned char* data, int type, int* seq) {
+    
+    unsigned char* buf = calloc(MAX_DATA_BYTES, sizeof(unsigned char));
+    msgHeader* header = (msgHeader *)(buf);
+
+    if (data) {
+        create_msgHeader(header, *seq, strlen(data), type);
+    } else {
+        create_msgHeader(header, *seq, 0, type);
+    }
+
+    int msg_size = sizeof(header)+header->size;
+    int parity = 0;
+
+    for (int i = sizeof(header); i < msg_size; i++) {
+        buf[i] = data[i - sizeof(header)];
+        parity ^= buf[i];
+    }
+
+    buf[MAX_DATA_BYTES-1] = parity;
+    sendto(socket, buf, MAX_DATA_BYTES, 0, NULL, 0);
+    inc_seq(seq);
+
+    free(buf);
+}
+
+void inc_seq(int* counter) {
+    *counter = (*counter % 16);
+}

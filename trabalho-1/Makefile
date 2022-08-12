@@ -1,6 +1,6 @@
 # Richard Fernando Heise Ferreira (GRR20191053)
 
-CFLAGS  = -g
+CFLAGS  = -g -Wall
 CC = gcc 
 
 #-----------------------------------------------------------------------------#
