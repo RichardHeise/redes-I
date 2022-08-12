@@ -5,9 +5,61 @@
 #include <unistd.h> 
 
 int counter_seq = 0;
+int last_seq = 15;
 
-void remote_mkdir(int server, unsigned char* dir, int type) {
-    send_msg(server, dir, type, &counter_seq);
+
+void print_error(unsigned char* buf) {
+    char error = (buf+sizeof(msgHeader))[0];
+
+    switch(error) {
+        case 'B':
+            fprintf(stderr, "Sem permissão de acesso.\n");
+            break;
+        case 'C':
+            fprintf(stderr, "Diretório já existe.\n");
+            break;
+        case 'E':
+            fprintf(stderr, "Falta espaço em disco.\n");
+            break;
+        default:
+            fprintf(stderr, "Erro desconhecido.\n");
+            break;
+    }
+}
+
+
+void choose_response(unsigned char* buf, int server, int type) {
+    msgHeader* header = (msgHeader*)(buf);
+    switch (header->type) {
+        case NACK:
+            send_msg(server, buf, type, &counter_seq);
+            break;
+        case ERROR:
+            print_error(buf);
+            break;
+        case OK:
+            fprintf(stderr, "Fechou, mano, boa (y).\n");
+            break;
+        default:
+            break;
+    }
+}
+
+void remote_mkdir(int server, unsigned char* dir) {
+    send_msg(server, dir, MKDIR, &counter_seq);
+
+    unsigned char* buf = calloc(MAX_DATA_BYTES, sizeof(unsigned char));
+    
+    if ( recvfrom(server, buf, MAX_DATA_BYTES, 0, NULL, 0) < 0) {
+        perror("Error while receiving data. Aborting\n");
+        exit(-2);
+    }
+    fprintf(stderr,"AQUI ESSA MNERDA %d\n ",buf[0]);
+
+    if (buf[0] == INIT_MARKER) {
+        if ( unpack_msg(buf, server, &counter_seq, &last_seq) )  
+            choose_response(buf, server, MKDIR);
+    }
 }
 
 void local_mkdir(unsigned char* dir) {
@@ -122,7 +174,7 @@ void client_controller(int server) {
                 local_cd(dir);
                 break;
             case MKDIR:
-                remote_mkdir(server, dir, type);
+                remote_mkdir(server, dir);
                 break;
             case MKDIRL:
                 local_mkdir(dir);
@@ -144,7 +196,6 @@ int main () {
         perror("Error while creating socket, aborting.\n");
         exit(-1);
     }
-
     system("clear");
     client_controller(server);
 

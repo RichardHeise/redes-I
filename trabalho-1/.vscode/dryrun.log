@@ -1,0 +1,9 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/heise/redes-I/trabalho-1'
+gcc  -g -Wall   -c -o client.o client.c
+gcc  -g -Wall   -c -o RawSocket.o RawSocket.c
+gcc    client.o RawSocket.o   -o client
+gcc  -g -Wall   -c -o server.o server.c
+gcc    server.o RawSocket.o   -o server
+make: Leaving directory '/home/heise/redes-I/trabalho-1'
+ 

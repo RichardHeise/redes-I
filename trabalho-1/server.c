@@ -5,9 +5,11 @@
 #include <unistd.h> 
 #include <errno.h>
 
-int counter_seq = -1;
+int counter_seq = 0;
+int last_seq = 15;
 
 void mkdir_server(unsigned char* buf, int client) {
+    
     msgHeader* header = (msgHeader *)(buf);
     unsigned char* data = (sizeof(header) + buf);
     data[header->size] = '\0';
@@ -18,29 +20,28 @@ void mkdir_server(unsigned char* buf, int client) {
 
     } else {
 
-      switch (errno){
-        case EACCES:
-        case EFAULT:
-            data[0]='B';    // retorna que não possui permissão de acesso
-            break;
-        case EEXIST:
-            data[0]='C';    // diretório já existe
-            break;
-        case ENOSPC:
-            data[0]='E';    // retorna que não há espaço em disco para criar diretório
-            break; 
-        default:
-            data[0]='Z';    // erros que não foram definidos em sala
-            break;
-      }
-      send_msg(client, data, ERROR, &counter_seq);
-
+        switch (errno){
+            case EACCES:
+            case EFAULT:
+                data[0]='B';    // retorna que não possui permissão de acesso
+                break;
+            case EEXIST:
+                data[0]='C';    // diretório já existe
+                break;
+            case ENOSPC:
+                data[0]='E';    // retorna que não há espaço em disco para criar diretório
+                break; 
+            default:
+                data[0]='G';    // erros que não foram definidos em sala
+                break;
+        }
+        send_msg(client, data, ERROR, &counter_seq);
     }
 }
 
 void choose_command(unsigned char* buf, int client) {
     msgHeader* header = (msgHeader*)(buf);
-
+    
     switch (header->type)
     {
     case MKDIR:
@@ -50,37 +51,6 @@ void choose_command(unsigned char* buf, int client) {
     default:
         break;
     }
-}
-
-int unpack_msg(unsigned char* buf, int client) {
-
-    msgHeader* header = (msgHeader *)(buf);
-    int parity = 0;
-
-    unsigned char* data = (sizeof(header) + buf);
-    for (int i = 0; i < header->size; i++) {
-        parity ^= data[i];
-    }
-    
-    if (parity != buf[MAX_DATA_BYTES-1]) {
-        send_msg(client, NULL, NACK, &counter_seq);
-        return 0;
-    }
-
-    int shouldBe_seq;
-    if (counter_seq == 15) {
-        shouldBe_seq = 0;
-    } else {
-        shouldBe_seq = counter_seq + 1;
-    }
-
-    if ( header->seq != shouldBe_seq ) {
-        send_msg(client, NULL, NACK, &counter_seq);
-        return 0;
-    }
-
-    return 1;
-
 }
 
 void server_controller(int client) {
@@ -93,8 +63,9 @@ void server_controller(int client) {
             exit(-2);
         }
 
-        if (buf[0] == 126) {
-            if ( unpack_msg(buf, client) )  
+        if (buf[0] == INIT_MARKER) {
+            
+            if ( unpack_msg(buf, client, &counter_seq, &last_seq) )  
                 choose_command(buf, client);
         }
     }

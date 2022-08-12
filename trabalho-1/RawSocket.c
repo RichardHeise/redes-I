@@ -51,7 +51,7 @@ void create_msgHeader(msgHeader* header, int seq, int size, int type) {
 
 }
 
-void printf_msgHeader(msgHeader* header) {
+void print_msgHeader(msgHeader* header) {
     printf(
         "Init marker: %d\nseq: %d\nsize: %d\ntype: %d\n",
         header->init_mark, header->seq, header->size, header->type
@@ -78,6 +78,8 @@ void send_msg(int socket, unsigned char* data, int type, int* seq) {
     }
 
     buf[MAX_DATA_BYTES-1] = parity;
+    print_msgHeader(header);
+
     sendto(socket, buf, MAX_DATA_BYTES, 0, NULL, 0);
     inc_seq(seq);
 
@@ -85,5 +87,37 @@ void send_msg(int socket, unsigned char* data, int type, int* seq) {
 }
 
 void inc_seq(int* counter) {
-    *counter = (*counter % 16);
+    *counter = ((*counter+1) % 16);
+}
+
+int unpack_msg(unsigned char* buf, int client, int* seq, int* last_seq) {
+
+    msgHeader* header = (msgHeader *)(buf);
+    int parity = 0;
+    
+    unsigned char* data = (sizeof(header) + buf);
+    for (int i = 0; i < header->size; i++) {
+        parity ^= data[i];
+    }
+    
+    if (parity != buf[MAX_DATA_BYTES-1]) {
+        send_msg(client, NULL, NACK, seq);
+        return 0;
+    }
+
+
+    int shouldBe_seq = *last_seq;
+
+    inc_seq(&shouldBe_seq);
+
+
+    if ( header->seq != shouldBe_seq ) {
+        fprintf(stderr, "desconte esse:\n");
+        send_msg(client, NULL, NACK, seq);
+        return 0;
+    }
+
+    *last_seq = header->seq;
+    return 1;
+
 }
