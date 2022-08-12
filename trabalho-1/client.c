@@ -59,10 +59,10 @@ void remote_mkdir(int server, unsigned char* dir) {
         }
 
         if (buf[0] == INIT_MARKER) {
-            if ( unpack_msg(buf, server, &counter_seq, &last_seq) )  
-                if ( choose_response(buf, server, MKDIR) ) {
-                    break;
-                }
+            if ( unpack_msg(buf, server, &counter_seq, &last_seq) )  {
+                choose_response(buf, server, MKDIR);
+                break;
+            }
         }
     }
 }
@@ -195,7 +195,7 @@ void client_controller(int server) {
 
 int main () {
 
-    int server = ConexaoRawSocket("lo");
+    int server = ConexaoRawSocket("enp7s0f0");
 
     if (server < 0) {
         perror("Error while creating socket, aborting.\n");
