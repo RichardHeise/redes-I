@@ -45,4 +45,6 @@ void print_msgHeader(msgHeader* header);
 
 void send_msg(int socket, unsigned char* data, int type, int* seq);
 
+int unpack_msg(unsigned char* buf, int client, int* seq, int* last_seq);
+
 void inc_seq(int* counter);

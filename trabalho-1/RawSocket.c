@@ -105,7 +105,6 @@ int unpack_msg(unsigned char* buf, int client, int* seq, int* last_seq) {
         return 0;
     }
 
-
     int shouldBe_seq = *last_seq;
 
     inc_seq(&shouldBe_seq);

@@ -9,7 +9,7 @@ int last_seq = 15;
 
 
 void print_error(unsigned char* buf) {
-    char error = (buf+sizeof(msgHeader))[0];
+    char error = (buf+sizeof(msgHeader*))[0];
 
     switch(error) {
         case 'B':
@@ -28,7 +28,7 @@ void print_error(unsigned char* buf) {
 }
 
 
-void choose_response(unsigned char* buf, int server, int type) {
+int choose_response(unsigned char* buf, int server, int type) {
     msgHeader* header = (msgHeader*)(buf);
     switch (header->type) {
         case NACK:
@@ -39,26 +39,31 @@ void choose_response(unsigned char* buf, int server, int type) {
             break;
         case OK:
             fprintf(stderr, "Fechou, mano, boa (y).\n");
+            return 1;
             break;
         default:
             break;
     }
+    return 0;
 }
 
 void remote_mkdir(int server, unsigned char* dir) {
     send_msg(server, dir, MKDIR, &counter_seq);
 
     unsigned char* buf = calloc(MAX_DATA_BYTES, sizeof(unsigned char));
-    
-    if ( recvfrom(server, buf, MAX_DATA_BYTES, 0, NULL, 0) < 0) {
-        perror("Error while receiving data. Aborting\n");
-        exit(-2);
-    }
-    fprintf(stderr,"AQUI ESSA MNERDA %d\n ",buf[0]);
 
-    if (buf[0] == INIT_MARKER) {
-        if ( unpack_msg(buf, server, &counter_seq, &last_seq) )  
-            choose_response(buf, server, MKDIR);
+    while(1) {
+        if ( recvfrom(server, buf, MAX_DATA_BYTES, 0, NULL, 0) < 0) {
+            perror("Error while receiving data. Aborting\n");
+            exit(-2);
+        }
+
+        if (buf[0] == INIT_MARKER) {
+            if ( unpack_msg(buf, server, &counter_seq, &last_seq) )  
+                if ( choose_response(buf, server, MKDIR) ) {
+                    break;
+                }
+        }
     }
 }
 
