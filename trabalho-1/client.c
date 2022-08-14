@@ -28,27 +28,32 @@ void print_error(unsigned char* buf) {
 }
 
 
-int choose_response(unsigned char* buf, int server, int type) {
+int choose_response(unsigned char* buf, int server) {
     msgHeader* header = (msgHeader*)(buf);
+
+    fprintf(stderr, "\nHeader atual:\n");
+    print_msgHeader(header);
+    fprintf(stderr, "\n");
+
     switch (header->type) {
         case NACK:
-            send_msg(server, buf, type, &counter_seq);
-            break;
+            send_msg(server, 0, NACK, &counter_seq);
+            return 1;
         case ERROR:
             print_error(buf);
-            break;
-        case OK:
-            fprintf(stderr, "Fechou, mano, boa (y).\n");
             return 1;
-            break;
+        case OK:
+            fprintf(stderr, "Servidor executou a ação com sucesso.\n");
+            return 1;
         default:
+            fprintf(stderr, "Tipo desconhecido.\n");
             break;
     }
     return 0;
 }
 
 void remote_mkdir(int server, unsigned char* dir) {
-    send_msg(server, dir, MKDIR, &counter_seq);
+    send_msg(server, dir, RMKDIR, &counter_seq);
 
     unsigned char* buf = calloc(MAX_DATA_BYTES, sizeof(unsigned char));
 
@@ -60,11 +65,14 @@ void remote_mkdir(int server, unsigned char* dir) {
 
         if (buf[0] == INIT_MARKER) {
             if ( unpack_msg(buf, server, &counter_seq, &last_seq) )  {
-                choose_response(buf, server, MKDIR);
+                choose_response(buf, server);
                 break;
             }
         }
+        memset(buf,0,MAX_DATA_BYTES);
     }
+
+    free(buf);
 }
 
 void local_mkdir(unsigned char* dir) {
@@ -110,7 +118,7 @@ int get_type(unsigned char* buf, int *opts, unsigned char* dir) {
         if(opt_a == 1 && opt_l == 1)
             *opts = 3;
 
-        return LSL;
+        return LS;
 
     }
 
@@ -127,23 +135,23 @@ int get_type(unsigned char* buf, int *opts, unsigned char* dir) {
         if(opt_a == 1 && opt_l == 1)
             *opts = 3;
 
-        return LS;
+        return RLS;
     }
     if(!strncmp("cd", command, 3)){
         strncpy(dir, opt1, 63);
-        return CDL;
+        return CD;
     }
     if(!strncmp("rcd", command, 3)){
         strncpy(dir, opt1, 63);
-        return CD;
+        return RCD;
     }
     if(!strncmp("mkdir", command, 6)){
         strncpy(dir, opt1, 63);
-        return MKDIRL;
+        return MKDIR;
     }
     if(!strncmp("rmkdir", command, 6)){
         strncpy(dir, opt1, 63);
-        return MKDIR;
+        return RMKDIR;
     }
     else
         return 0;
@@ -166,22 +174,22 @@ void client_controller(int server) {
         type = get_type(input, &ls_opts, dir);
 
         switch(type) {
-            case LS:
+            case RLS:
                 //remote_ls();
                 break;
-            case LSL:
+            case LS:
                 local_ls(ls_opts);
                 break;
-            case CD:
+            case RCD:
                 //remote_cd();
                 break;
-            case CDL:
+            case CD:
                 local_cd(dir);
                 break;
-            case MKDIR:
+            case RMKDIR:
                 remote_mkdir(server, dir);
                 break;
-            case MKDIRL:
+            case MKDIR:
                 local_mkdir(dir);
                 break;
             default:
@@ -195,12 +203,14 @@ void client_controller(int server) {
 
 int main () {
 
-    int server = ConexaoRawSocket("enp7s0f0");
+    // int server = ConexaoRawSocket("enp7s0f0");
+    int server = ConexaoRawSocket("lo");
 
     if (server < 0) {
         perror("Error while creating socket, aborting.\n");
         exit(-1);
     }
+    
     system("clear");
     client_controller(server);
 

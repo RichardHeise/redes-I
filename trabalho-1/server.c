@@ -15,11 +15,12 @@ void mkdir_server(unsigned char* buf, int client) {
     data[header->size] = '\0';
 
     if (!mkdir(data, 0700)) {
-
+        fprintf(stderr, "mkdir remoto funcionou.\n");
         send_msg(client, data, OK, &counter_seq);
 
     } else {
 
+        fprintf(stderr, "mkdir remoto falhou, mandando erro para o cliente.\n");
         switch (errno){
             case EACCES:
             case EFAULT:
@@ -42,14 +43,14 @@ void mkdir_server(unsigned char* buf, int client) {
 void choose_command(unsigned char* buf, int client) {
     msgHeader* header = (msgHeader*)(buf);
     
-    switch (header->type)
-    {
-    case MKDIR:
-        mkdir_server(buf, client);
-        break;
+    switch (header->type) {
+        case RMKDIR:
+            fprintf(stderr, "Executando um mkdir.\n");
+            mkdir_server(buf, client);
+            break;
     
-    default:
-        break;
+        default:
+            break;
     }
 }
 
@@ -65,15 +66,24 @@ void server_controller(int client) {
 
         if (buf[0] == INIT_MARKER) {
             
-            if ( unpack_msg(buf, client, &counter_seq, &last_seq) )  
+            if ( unpack_msg(buf, client, &counter_seq, &last_seq) )  {
+                fprintf(stderr, "Recebi o pacote.\n");
                 choose_command(buf, client);
+            }
         }
+
+        memset(buf,0,MAX_DATA_BYTES);
     }
+
+    free(buf);
 }
 
 int main () {
+    // int client = ConexaoRawSocket("enp7s0f0");
     int client = ConexaoRawSocket("lo");
 
+    system("clear");
+    fprintf(stderr, "Servidor inicializado, aguardando pacotes.\n");
     server_controller(client);
 
     return 1;

@@ -78,7 +78,6 @@ void send_msg(int socket, unsigned char* data, int type, int* seq) {
     }
 
     buf[MAX_DATA_BYTES-1] = parity;
-    print_msgHeader(header);
 
     sendto(socket, buf, MAX_DATA_BYTES, 0, NULL, 0);
     inc_seq(seq);
@@ -90,9 +89,14 @@ void inc_seq(int* counter) {
     *counter = ((*counter+1) % 16);
 }
 
-int unpack_msg(unsigned char* buf, int client, int* seq, int* last_seq) {
+int unpack_msg(unsigned char* buf, int socket, int* seq, int* last_seq) {
 
     msgHeader* header = (msgHeader *)(buf);
+
+    if (*last_seq == header->seq) {
+        return 0;
+    }
+
     int parity = 0;
     
     unsigned char* data = (sizeof(header) + buf);
@@ -101,7 +105,7 @@ int unpack_msg(unsigned char* buf, int client, int* seq, int* last_seq) {
     }
     
     if (parity != buf[MAX_DATA_BYTES-1]) {
-        send_msg(client, NULL, NACK, seq);
+        send_msg(socket, NULL, NACK, seq);
         return 0;
     }
 
@@ -111,8 +115,7 @@ int unpack_msg(unsigned char* buf, int client, int* seq, int* last_seq) {
 
 
     if ( header->seq != shouldBe_seq ) {
-        fprintf(stderr, "desconte esse:\n");
-        send_msg(client, NULL, NACK, seq);
+        send_msg(socket, NULL, NACK, seq);
         return 0;
     }
 
