@@ -1,8 +1,6 @@
 {
+    "makefile.extensionOutputFolder": "./.vscode",
     "files.associations": {
-        "ioctl.h": "c",
-        "rawsocket.h": "c",
-        "string.h": "c",
-        "stat.h": "c"
+        "syscall.h": "c"
     }
 }

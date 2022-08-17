@@ -8,6 +8,57 @@
 int counter_seq = 0;
 int last_seq = 15;
 
+void ls_server(unsigned char* buf, int client) {
+
+    msgHeader* header = (msgHeader *)(buf);
+
+    unsigned char pipes[2];
+
+    pipe(pipes); // Create the pipes
+
+    dup2(pipes[1],1); // Set the pipe up to standard output
+
+    FILE *input = fdopen(pipes[0],"r");
+
+    fwrite((unsigned char *)(buf + sizeof(header)), sizeof(char), header->size, input);
+
+    fprintf(stderr, "%s\n", pipes[0]);
+}
+
+void cd_server(unsigned char* buf, int client) {
+
+    msgHeader* header = (msgHeader *)(buf);
+
+    unsigned char* data = (sizeof(header) + buf);
+    data[header->size] = '\0';
+
+    if (!chdir(data)) {
+        
+        send_msg(client, data, OK, &counter_seq);
+
+        fprintf(stderr, "cd remoto funcionou.\n");
+
+    } else {
+
+        fprintf(stderr, "cd remoto falhou, mandando erro para o cliente.\n");
+        switch (errno){
+            case EACCES:
+            case EFAULT:
+                data[0]='B';    // retorna que não possui permissão de acesso
+                break;
+            case ENOTDIR:
+            case ENOENT:
+                data[0]='A';    // retorna que o diretório não exite
+                break;
+            default:
+                data[0]='Z';    // erros que não foram definidos em sala
+                break;
+        }
+       
+        send_msg(client, data, ERROR, &counter_seq);
+    }
+}
+
 void mkdir_server(unsigned char* buf, int client) {
     
     msgHeader* header = (msgHeader *)(buf);
@@ -15,8 +66,10 @@ void mkdir_server(unsigned char* buf, int client) {
     data[header->size] = '\0';
 
     if (!mkdir(data, 0700)) {
-        fprintf(stderr, "mkdir remoto funcionou.\n");
+        
         send_msg(client, data, OK, &counter_seq);
+
+        fprintf(stderr, "mkdir remoto funcionou.\n");
 
     } else {
 
@@ -36,6 +89,7 @@ void mkdir_server(unsigned char* buf, int client) {
                 data[0]='G';    // erros que não foram definidos em sala
                 break;
         }
+       
         send_msg(client, data, ERROR, &counter_seq);
     }
 }
@@ -48,7 +102,14 @@ void choose_command(unsigned char* buf, int client) {
             fprintf(stderr, "Executando um mkdir.\n");
             mkdir_server(buf, client);
             break;
-    
+        case RCD:
+            fprintf(stderr, "Executando um cd remoto.\n");
+            cd_server(buf, client);
+            break;
+        case RLS:
+            fprintf(stderr, "Executando um ls remoto.\n");
+            ls_server(buf, client);
+            break;
         default:
             break;
     }
@@ -66,7 +127,7 @@ void server_controller(int client) {
 
         if (buf[0] == INIT_MARKER) {
             
-            if ( unpack_msg(buf, client, &counter_seq, &last_seq) )  {
+            if ( unpack_msg(buf, client, &counter_seq, &last_seq, 0) )  {
                 fprintf(stderr, "Recebi o pacote.\n");
                 choose_command(buf, client);
             }

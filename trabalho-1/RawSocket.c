@@ -89,11 +89,24 @@ void inc_seq(int* counter) {
     *counter = ((*counter+1) % 16);
 }
 
-int unpack_msg(unsigned char* buf, int socket, int* seq, int* last_seq) {
+int unpack_msg(unsigned char* buf, int socket, int* seq, int* last_seq, int type) {
 
     msgHeader* header = (msgHeader *)(buf);
 
-    if (*last_seq == header->seq) {
+    if (*last_seq == header->seq || type == header->type) {
+        // fprintf(stderr, "\n++ ERRO NA SEQUÊNCIA ++\n");
+        // print_msgHeader(header);
+        // for (int i = 0; i < header->size; i++) {
+        // unsigned char d = (((unsigned char*)(header)) + sizeof(header))[i];
+        //     if (d < 0x20) {
+        //         fprintf(stderr,"[%d]", d);
+        //     } else {
+        //         fprintf(stderr,"'%c'", d);
+        //     }
+        // }
+        // fprintf(stderr,"\n");
+        // fprintf(stderr, "last_seq: %d\n", *last_seq);
+        // fprintf(stderr, "++ FIM ++\n");
         return 0;
     }
 
@@ -105,6 +118,19 @@ int unpack_msg(unsigned char* buf, int socket, int* seq, int* last_seq) {
     }
     
     if (parity != buf[MAX_DATA_BYTES-1]) {
+        // fprintf(stderr, "\n++ ERRO NA PARIDADE ++\n");
+        // print_msgHeader(header);
+        // for (int i = 0; i < header->size; i++) {
+        // unsigned char d = (((unsigned char*)(header)) + sizeof(header))[i];
+        //     if (d < 0x20) {
+        //         fprintf(stderr,"[%d]", d);
+        //     } else {
+        //         fprintf(stderr,"'%c'", d);
+        //     }
+        // }
+        // fprintf(stderr,"\n");
+        // fprintf(stderr, "++ FIM ++\n");
+        // fprintf(stderr, "partidade: %d\n", parity);
         send_msg(socket, NULL, NACK, seq);
         return 0;
     }
@@ -113,8 +139,20 @@ int unpack_msg(unsigned char* buf, int socket, int* seq, int* last_seq) {
 
     inc_seq(&shouldBe_seq);
 
-
     if ( header->seq != shouldBe_seq ) {
+        // fprintf(stderr, "\n++ ERRO NA SEQ QUE DEVERIA SER ++\n");
+        // print_msgHeader(header);
+        // for (int i = 0; i < header->size; i++) {
+        // unsigned char d = (((unsigned char*)(header)) + sizeof(header))[i];
+        //     if (d < 0x20) {
+        //         fprintf(stderr,"[%d]", d);
+        //     } else {
+        //         fprintf(stderr,"'%c'", d);
+        //     }
+        // }
+        // fprintf(stderr,"\n");
+        // fprintf(stderr, "++ FIM ++\n");
+        // fprintf(stderr, "seq: %d\n", shouldBe_seq);
         send_msg(socket, NULL, NACK, seq);
         return 0;
     }

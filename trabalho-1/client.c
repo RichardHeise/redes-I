@@ -3,15 +3,18 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h> 
+#include <errno.h>
 
 int counter_seq = 0;
 int last_seq = 15;
-
 
 void print_error(unsigned char* buf) {
     char error = (buf+sizeof(msgHeader*))[0];
 
     switch(error) {
+        case 'A':
+            fprintf(stderr, "Diretório não existe.\n");
+            break;
         case 'B':
             fprintf(stderr, "Sem permissão de acesso.\n");
             break;
@@ -27,13 +30,8 @@ void print_error(unsigned char* buf) {
     }
 }
 
-
 int choose_response(unsigned char* buf, int server) {
     msgHeader* header = (msgHeader*)(buf);
-
-    fprintf(stderr, "\nHeader atual:\n");
-    print_msgHeader(header);
-    fprintf(stderr, "\n");
 
     switch (header->type) {
         case NACK:
@@ -52,26 +50,28 @@ int choose_response(unsigned char* buf, int server) {
     return 0;
 }
 
-void remote_mkdir(int server, unsigned char* dir) {
-    send_msg(server, dir, RMKDIR, &counter_seq);
+void remote_cmd(int server, unsigned char* dir, int type) {
+    send_msg(server, dir, type, &counter_seq);
 
     unsigned char* buf = calloc(MAX_DATA_BYTES, sizeof(unsigned char));
 
     while(1) {
+
         if ( recvfrom(server, buf, MAX_DATA_BYTES, 0, NULL, 0) < 0) {
             perror("Error while receiving data. Aborting\n");
             exit(-2);
         }
 
         if (buf[0] == INIT_MARKER) {
-            if ( unpack_msg(buf, server, &counter_seq, &last_seq) )  {
+            
+            if ( unpack_msg(buf, server, &counter_seq, &last_seq, type) )  {
                 choose_response(buf, server);
                 break;
             }
         }
         memset(buf,0,MAX_DATA_BYTES);
     }
-
+    
     free(buf);
 }
 
@@ -165,6 +165,7 @@ void client_controller(int server) {
     int type, ls_opts;
 
     while(1) {
+
         char rel_path[MAX_DATA_BYTES];
         fprintf(stderr,"%s:\n-> ", getcwd(rel_path, sizeof(rel_path)));
         
@@ -175,19 +176,19 @@ void client_controller(int server) {
 
         switch(type) {
             case RLS:
-                //remote_ls();
+                remote_cmd(server, dir, RLS);
                 break;
             case LS:
                 local_ls(ls_opts);
                 break;
             case RCD:
-                //remote_cd();
+                remote_cmd(server, dir, RCD);
                 break;
             case CD:
                 local_cd(dir);
                 break;
             case RMKDIR:
-                remote_mkdir(server, dir);
+                remote_cmd(server, dir, RMKDIR);
                 break;
             case MKDIR:
                 local_mkdir(dir);
