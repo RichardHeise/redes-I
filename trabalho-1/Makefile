@@ -14,7 +14,7 @@ rServer: server
 
 client: client.o RawSocket.o
 
-server: server.o RawSocket.o
+server: server.o RawSocket.o -lm
 
 #-----------------------------------------------------------------------------#
 

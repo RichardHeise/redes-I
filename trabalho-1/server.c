@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <unistd.h> 
 #include <errno.h>
+#include <math.h>
 
 int counter_seq = 0;
 int last_seq = 15;
@@ -12,17 +13,36 @@ void ls_server(unsigned char* buf, int client) {
 
     msgHeader* header = (msgHeader *)(buf);
 
-    unsigned char pipes[2];
+    system("ls > .saida.txt");
 
-    pipe(pipes); // Create the pipes
+    unsigned char* data = calloc(DATA_BYTES, sizeof(unsigned char));
 
-    dup2(pipes[1],1); // Set the pipe up to standard output
+    FILE *reader = fopen(".saida.txt","rb");
 
-    FILE *input = fdopen(pipes[0],"r");
+    double file_size = 0.0;
+    while(fgetc(reader) != EOF) {
+        file_size += 1;
+    }
 
-    fwrite((unsigned char *)(buf + sizeof(header)), sizeof(char), header->size, input);
+    rewind(reader);
 
-    fprintf(stderr, "%s\n", pipes[0]);
+    int num_packages = ceil(file_size/DATA_BYTES);  
+
+    for (int i = 0; i < num_packages+1; i++) {
+        for (int j = 0; j < DATA_BYTES; j++) {
+
+            if (!feof(reader))
+                data[j] = fgetc(reader);
+            else 
+                break;
+        }
+        send_msg(client, data, RLS, &counter_seq);
+        memset(data, 0, DATA_BYTES);
+        if (feof(reader)) break;
+    }
+    
+
+    system("rm -f .saida.txt");
 }
 
 void cd_server(unsigned char* buf, int client) {

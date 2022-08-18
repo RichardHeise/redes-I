@@ -43,6 +43,10 @@ int choose_response(unsigned char* buf, int server) {
         case OK:
             fprintf(stderr, "Servidor executou a ação com sucesso.\n");
             return 1;
+        case RLS:
+            // parse_ls(buf);
+            fprintf(stderr, "entrou\n");
+            return 1;
         default:
             fprintf(stderr, "Tipo desconhecido.\n");
             break;
@@ -55,6 +59,7 @@ void remote_cmd(int server, unsigned char* dir, int type) {
 
     unsigned char* buf = calloc(MAX_DATA_BYTES, sizeof(unsigned char));
 
+    msgHeader* header = (msgHeader*)(buf);
     while(1) {
 
         if ( recvfrom(server, buf, MAX_DATA_BYTES, 0, NULL, 0) < 0) {
@@ -63,8 +68,17 @@ void remote_cmd(int server, unsigned char* dir, int type) {
         }
 
         if (buf[0] == INIT_MARKER) {
-            
             if ( unpack_msg(buf, server, &counter_seq, &last_seq, type) )  {
+                print_msgHeader(header);
+                for (int i = 0; i < header->size; i++) {
+                unsigned char d = (((unsigned char*)(header)) + sizeof(header))[i];
+                    if (d < 0x20) {
+                        fprintf(stderr,"[%d]", d);
+                    } else {
+                        fprintf(stderr,"'%c'", d);
+                    }
+                }
+                fprintf(stderr,"\n");
                 choose_response(buf, server);
                 break;
             }
