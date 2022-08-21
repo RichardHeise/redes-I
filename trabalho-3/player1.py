@@ -26,5 +26,6 @@ while(True):
                 8-YAHTZEE
                 """)
         bet = int(input("What say you? (bet 1-8)"))
-
+        bet_value = int(input("How much will you bet? The minimum is 1"))
+        
 
