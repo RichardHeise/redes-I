@@ -65,7 +65,7 @@ def points(type):
   if type == 8:
     return int(YAHTZEE)
 
-def rollDices(bet):
+def rollDices():
     dice1 = {"roll" : True, "value" : 0}
     dice2 = {"roll" : True, "value" : 0}
     dice3 = {"roll" : True, "value" : 0}
@@ -111,9 +111,4 @@ def rollDices(bet):
 
     result_values.sort()
 
-    result = dicesResult(result_values)
-
-    if bet == result:
-        return True
-    else: 
-        return False
+    return dicesResult(result_values)

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import socket
 
 UDP_IP = "localhost"
