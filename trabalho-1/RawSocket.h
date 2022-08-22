@@ -16,6 +16,7 @@ enum fields {
     ACK = 3,
     RCD = 6,
     RLS = 7,
+    SENDING = 42,
     RMKDIR = 8,
     GET = 9,
     PUT = 10,

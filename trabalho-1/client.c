@@ -8,6 +8,51 @@
 int counter_seq = 0;
 int last_seq = 15;
 
+int ls_response(unsigned char* buf, int socket) {
+    msgHeader* header = (msgHeader*)(buf);
+
+    print_msgHeader(header);
+
+    switch (header->type) {
+        case SENDING:
+            fprintf(stderr, "%s", (buf + sizeof(msgHeader)) );
+            break;
+        case END:
+            fprintf(stderr, "Mensagem recebida.\n");
+            return 1;
+        default:
+            fprintf(stderr, "Tipo desconhecido.\n");
+            break;
+    }
+    return 0;
+}
+
+void remote_ls(int socket, int opts) {
+    unsigned char* data = calloc(DATA_BYTES, sizeof(unsigned char));
+    data[0] = opts;
+    send_msg(socket, data, RLS, &counter_seq);
+
+    unsigned char* buf = calloc(MAX_DATA_BYTES, sizeof(unsigned char));
+
+    while(1) {
+
+        if ( recvfrom(socket, buf, MAX_DATA_BYTES, 0, NULL, 0) < 0) {
+            perror("Error while receiving data. Aborting\n");
+            exit(-2);
+        }
+
+        if (buf[0] == INIT_MARKER) {
+            if ( unpack_msg(buf, socket, &counter_seq, &last_seq, RLS) )  {
+                if (ls_response(buf, socket))
+                    break;
+            }
+        }
+        memset(buf,0,MAX_DATA_BYTES);
+    }
+    
+    free(buf);
+}
+
 void print_error(unsigned char* buf) {
     char error = (buf+sizeof(msgHeader*))[0];
 
@@ -35,6 +80,7 @@ int choose_response(unsigned char* buf, int server) {
 
     switch (header->type) {
         case NACK:
+            fprintf(stderr, "ue");
             send_msg(server, 0, NACK, &counter_seq);
             return 1;
         case ERROR:
@@ -42,10 +88,6 @@ int choose_response(unsigned char* buf, int server) {
             return 1;
         case OK:
             fprintf(stderr, "Servidor executou a ação com sucesso.\n");
-            return 1;
-        case RLS:
-            // parse_ls(buf);
-            fprintf(stderr, "entrou\n");
             return 1;
         default:
             fprintf(stderr, "Tipo desconhecido.\n");
@@ -59,7 +101,6 @@ void remote_cmd(int server, unsigned char* dir, int type) {
 
     unsigned char* buf = calloc(MAX_DATA_BYTES, sizeof(unsigned char));
 
-    msgHeader* header = (msgHeader*)(buf);
     while(1) {
 
         if ( recvfrom(server, buf, MAX_DATA_BYTES, 0, NULL, 0) < 0) {
@@ -69,16 +110,6 @@ void remote_cmd(int server, unsigned char* dir, int type) {
 
         if (buf[0] == INIT_MARKER) {
             if ( unpack_msg(buf, server, &counter_seq, &last_seq, type) )  {
-                print_msgHeader(header);
-                for (int i = 0; i < header->size; i++) {
-                unsigned char d = (((unsigned char*)(header)) + sizeof(header))[i];
-                    if (d < 0x20) {
-                        fprintf(stderr,"[%d]", d);
-                    } else {
-                        fprintf(stderr,"'%c'", d);
-                    }
-                }
-                fprintf(stderr,"\n");
                 choose_response(buf, server);
                 break;
             }
@@ -190,7 +221,7 @@ void client_controller(int server) {
 
         switch(type) {
             case RLS:
-                remote_cmd(server, dir, RLS);
+                remote_ls(server, ls_opts);
                 break;
             case LS:
                 local_ls(ls_opts);

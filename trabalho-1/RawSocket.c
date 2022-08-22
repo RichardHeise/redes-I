@@ -69,16 +69,16 @@ void send_msg(int socket, unsigned char* data, int type, int* seq) {
         create_msgHeader(header, *seq, 0, type);
     }
 
-    int msg_size = sizeof(header)+header->size;
+    int msg_size = sizeof(msgHeader)+header->size;
     int parity = 0;
 
-    for (int i = sizeof(header); i < msg_size; i++) {
-        buf[i] = data[i - sizeof(header)];
+    for (int i = sizeof(msgHeader); i < msg_size; i++) {
+        buf[i] = data[i - sizeof(msgHeader)];
         parity ^= buf[i];
     }
 
     buf[MAX_DATA_BYTES-1] = parity;
-
+    
     sendto(socket, buf, MAX_DATA_BYTES, 0, NULL, 0);
     inc_seq(seq);
 
@@ -89,15 +89,17 @@ void inc_seq(int* counter) {
     *counter = ((*counter+1) % 16);
 }
 
-int unpack_msg(unsigned char* buf, int socket, int* seq, int* last_seq, int type) {
+int unpack_msg(unsigned char* buf, int origin, int target, int* seq, int* last_seq, int type) {
 
     msgHeader* header = (msgHeader *)(buf);
 
+    if (origin == target) return 0;
+    
     if (*last_seq == header->seq || type == header->type) {
         // fprintf(stderr, "\n++ ERRO NA SEQUÊNCIA ++\n");
         // print_msgHeader(header);
         // for (int i = 0; i < header->size; i++) {
-        // unsigned char d = (((unsigned char*)(header)) + sizeof(header))[i];
+        // unsigned char d = (((unsigned char*)(header)) + sizeof(msgHeader))[i];
         //     if (d < 0x20) {
         //         fprintf(stderr,"[%d]", d);
         //     } else {
@@ -112,7 +114,7 @@ int unpack_msg(unsigned char* buf, int socket, int* seq, int* last_seq, int type
 
     int parity = 0;
     
-    unsigned char* data = (sizeof(header) + buf);
+    unsigned char* data = (sizeof(msgHeader) + buf);
     for (int i = 0; i < header->size; i++) {
         parity ^= data[i];
     }
@@ -121,7 +123,7 @@ int unpack_msg(unsigned char* buf, int socket, int* seq, int* last_seq, int type
         // fprintf(stderr, "\n++ ERRO NA PARIDADE ++\n");
         // print_msgHeader(header);
         // for (int i = 0; i < header->size; i++) {
-        // unsigned char d = (((unsigned char*)(header)) + sizeof(header))[i];
+        // unsigned char d = (((unsigned char*)(header)) + sizeof(msgHeader))[i];
         //     if (d < 0x20) {
         //         fprintf(stderr,"[%d]", d);
         //     } else {
@@ -129,8 +131,10 @@ int unpack_msg(unsigned char* buf, int socket, int* seq, int* last_seq, int type
         //     }
         // }
         // fprintf(stderr,"\n");
+        // fprintf(stderr, "paridade buf: %d\n", buf[MAX_DATA_BYTES-1]);
         // fprintf(stderr, "++ FIM ++\n");
         // fprintf(stderr, "partidade: %d\n", parity);
+        fprintf(stderr, "aqui?\n");
         send_msg(socket, NULL, NACK, seq);
         return 0;
     }
@@ -140,23 +144,24 @@ int unpack_msg(unsigned char* buf, int socket, int* seq, int* last_seq, int type
     inc_seq(&shouldBe_seq);
 
     if ( header->seq != shouldBe_seq ) {
-        // fprintf(stderr, "\n++ ERRO NA SEQ QUE DEVERIA SER ++\n");
-        // print_msgHeader(header);
-        // for (int i = 0; i < header->size; i++) {
-        // unsigned char d = (((unsigned char*)(header)) + sizeof(header))[i];
-        //     if (d < 0x20) {
-        //         fprintf(stderr,"[%d]", d);
-        //     } else {
-        //         fprintf(stderr,"'%c'", d);
-        //     }
-        // }
-        // fprintf(stderr,"\n");
-        // fprintf(stderr, "++ FIM ++\n");
-        // fprintf(stderr, "seq: %d\n", shouldBe_seq);
+        fprintf(stderr, "\n++ ERRO NA SEQ QUE DEVERIA SER ++\n");
+        print_msgHeader(header);
+        for (int i = 0; i < header->size; i++) {
+        unsigned char d = (((unsigned char*)(header)) + sizeof(msgHeader))[i];
+            if (d < 0x20) {
+                fprintf(stderr,"[%d]", d);
+            } else {
+                fprintf(stderr,"'%c'", d);
+            }
+        }
+        fprintf(stderr,"\n");
+        fprintf(stderr, "seq: %d\n", shouldBe_seq);
+        fprintf(stderr, "++ FIM ++\n");
         send_msg(socket, NULL, NACK, seq);
         return 0;
     }
 
+    fprintf(stderr, "\n\nseq atual: %d\nlast seq: %d\n\n", header->seq, *last_seq);
     *last_seq = header->seq;
     return 1;
 

@@ -102,6 +102,8 @@ def rollDices():
 
             elif str(rerolling) == '0':
                 reroll_chances = 0
+        else:
+            print("\n")
 
     print("\n")
     result_values = [0,0,0,0,0]
@@ -112,3 +114,21 @@ def rollDices():
     result_values.sort()
 
     return dicesResult(result_values)
+
+def bet_name(bet_code):
+    if bet_code == 1:
+        return "PAIR"
+    if bet_code == 2:
+        return "THREE OF A KIND"
+    if bet_code == 3:
+        return "TWO PAIRS"
+    if bet_code == 4:
+        return "FULL-HOUSE"
+    if bet_code == 5:
+        return "SMALL STRAIGHT"
+    if bet_code == 6:
+        return "LARGE STRAIGHT"
+    if bet_code == 7:
+        return "FOUR OF A KIND"
+    if bet_code == 8:
+        return "YAHTZEE"

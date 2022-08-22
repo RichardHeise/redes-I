@@ -12,44 +12,41 @@ int last_seq = 15;
 void ls_server(unsigned char* buf, int client) {
 
     msgHeader* header = (msgHeader *)(buf);
+    int opts = (buf + sizeof(msgHeader))[0];
 
-    system("ls > .saida.txt");
+    if (opts == 0) {
+        system("ls > /tmp/saida.txt");
+    } else if (opts == 1) {
+        system("ls -a > /tmp/saida.txt");
+    } else if (opts == 2) {
+        system("ls -l > /tmp/saida.txt");
+    } else {
+        system("ls -a -l > /tmp/saida.txt");
+    }
 
     unsigned char* data = calloc(DATA_BYTES, sizeof(unsigned char));
 
-    FILE *reader = fopen(".saida.txt","rb");
+    FILE *reader = fopen("/tmp/saida.txt","rb");
 
-    double file_size = 0.0;
-    while(fgetc(reader) != EOF) {
-        file_size += 1;
-    }
-
-    rewind(reader);
-
-    int num_packages = ceil(file_size/DATA_BYTES);  
-
-    for (int i = 0; i < num_packages+1; i++) {
-        for (int j = 0; j < DATA_BYTES; j++) {
-
-            if (!feof(reader))
-                data[j] = fgetc(reader);
-            else 
-                break;
-        }
-        send_msg(client, data, RLS, &counter_seq);
+    while(!feof(reader)) {
         memset(data, 0, DATA_BYTES);
-        if (feof(reader)) break;
+        if ( fread(data, sizeof(unsigned char), DATA_BYTES-1, reader) ) {
+            send_msg(client, data, SENDING, &counter_seq);
+        }
     }
-    
+    rewind(reader);
+    send_msg(client, 0, END, &counter_seq);
 
-    system("rm -f .saida.txt");
+    fclose(reader);
+    free(data);
+    // system("rm -f /tmp/saida.txt");
 }
 
 void cd_server(unsigned char* buf, int client) {
 
     msgHeader* header = (msgHeader *)(buf);
 
-    unsigned char* data = (sizeof(header) + buf);
+    unsigned char* data = (sizeof(msgHeader) + buf);
     data[header->size] = '\0';
 
     if (!chdir(data)) {
@@ -82,7 +79,7 @@ void cd_server(unsigned char* buf, int client) {
 void mkdir_server(unsigned char* buf, int client) {
     
     msgHeader* header = (msgHeader *)(buf);
-    unsigned char* data = (sizeof(header) + buf);
+    unsigned char* data = (sizeof(msgHeader) + buf);
     data[header->size] = '\0';
 
     if (!mkdir(data, 0700)) {
