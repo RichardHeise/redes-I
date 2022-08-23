@@ -13,6 +13,7 @@ def create_package(origin, punter, bet_value, bet, won, chips):
         "bet" : bet,
         "won" : won,
         "chips" : chips,
+        "baton" : False
     }
 
 def send_msg(socket, data, receiver):
