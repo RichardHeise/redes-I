@@ -3,21 +3,32 @@
 import socket
 import network
 import game
+import sys
+
+id = int(sys.argv[1])
+to_id = (id % 4 + 1)
+
 
 UDP_IP = "localhost"
-UDP_PORT_SEND = 6661
-UDP_PORT_REC = 6664
+UDP_PORT_SEND = (666*10 + to_id)
+UDP_PORT_REC = (666*10 + id)
+
+print(id, to_id, UDP_PORT_REC, UDP_PORT_SEND)
 
 receiver = (UDP_IP, UDP_PORT_SEND)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind((UDP_IP, UDP_PORT_REC))
 
-baton = False
+if id == 1:
+    baton = True
+else:
+    baton = False
 chips = 5
 
 print("All set? Let's play.")
 print("You have " + str(chips) + " chips")
+
 while(True):
     if baton == True:
 
@@ -36,7 +47,7 @@ while(True):
         bet = int(input("What say you? (bet 1-8)\n"))
         bet_value = int(input("How much will you bet? The minimum is 1\n"))
 
-        data = network.create_package("player4", "player4", bet_value, bet, False, chips)
+        data = network.create_package(id, id, bet_value, bet, False, chips)
         network.send_msg(sock, data, receiver)
 
         print("Waiting other bets")
@@ -46,13 +57,9 @@ while(True):
 
         print("Alright. Let's see...")
         # whose play is it?
-        if data["punter"] == "player4":
+        if data["punter"] == id:
 
             # ++++++++++++++++++ Our play ++++++++++++++++++ 
-            data = network.create_package("player4", "player4", data["bet_value"], data["bet"], False, chips)
-            network.send_msg(sock, data, receiver)
-
-            data = network.receiv_msg(sock, receiver)
 
             print("Betting on a " + game.bet_name(data["bet"]) + " with " + str(data["bet_value"]) + " chips!")
             print("++++ It's your play, make it good, chap ++++\n")
@@ -62,49 +69,48 @@ while(True):
                 print("You won the bet!")
                 chips = chips + game.points(data["bet"])
                 print("You now have " +str(chips)+ " chips ;)")
-                data = network.create_package("player4", "player4", data["bet_value"], data["bet"], True, chips)
-                network.send_msg(sock, data, receiver)
+                data = network.create_package(id, id, data["bet_value"], data["bet"], True, chips)
+                data["played"] = True
 
             else:
                 print("You lost the bet, better luck next time...") # lose
                 chips = chips - data["bet_value"]
                 if chips <= 0:
                     print("You have no chips left, that means you lost the game :(")
-                    data = network.create_package("player4", "player4", data["bet_value"], data["bet"], False, chips)
+                    data = network.create_package(id, id, data["bet_value"], data["bet"], False, chips)
+                    data["played"] = True
                     network.send_msg(sock, data, receiver)
                     exit(0)
                 print("You now have " +str(chips)+ " chips ;)")
-                data = network.create_package("player4", "player4", data["bet_value"], data["bet"], False, chips)
-                network.send_msg(sock, data, receiver)
+                data = network.create_package(id, id, data["bet_value"], data["bet"], False, chips)
+                data["played"] = True
             # ++++++++++++++++++ Send our play through the net ++++++++++++++++++ 
 
         else:
 
             # ++++++++++++++++++ Their play ++++++++++++++++++
             print("Here they come! Betting on " +game.bet_name(data["bet"])+ " with " +str(data["chips"])+ " chips! Punter " +str(data["punter"])+ " is about to roll!")
-            data = network.create_package("player4", data["punter"], data["bet_value"], data["bet"], False, chips)
             network.send_msg(sock, data, receiver)
 
-            if data["punter"] != "player1":
-                data = network.receiv_msg(sock, receiver) # Receives result of the play
-
-                if data["won"] == True:
-                    print("He did it! The chad won, nice roll " +str(data["punter"]))
-                    print("Now " +str(data["punter"])+ " has " +str(data["chips"])+ " chips.")
-                    network.send_msg(sock, data, receiver)
-                else:
-                    print("Uuh, " +str(data["punter"])+ " didn't got that one...")
-                    network.send_msg(sock, data, receiver)
-                    if data["chips"] <= 0:
-                        print("Punter is broke!" +str(data["punter"])+ " just lost the game!")
-                        print("That's all, folks!")
-                        exit(0)
+            data = network.receiv_msg(sock, receiver) # Receives result of the play
+            
+            if data["won"] == True:
+                print("He did it! The chad won, nice roll " +str(data["punter"]))
+                print("Now " +str(data["punter"])+ " has " +str(data["chips"])+ " chips.")
+            else:
+                print("Uuh, " +str(data["punter"])+ " didn't got that one...")
+                if data["chips"] <= 0:
+                    print("Punter is broke!" +str(data["punter"])+ " just lost the game!")
+                    print("That's all, folks!")
+                    exit(0)
                 # ++++++++++++++++++ Sends their play so everybody is in sync ++++++++++++++++++
                     
         # ++++++++++++++++++ Awaits for sync and sends baton to the next ++++++++++++++++++
+
+        network.send_msg(sock, data, receiver)
         data = network.receiv_msg(sock, receiver)
-        if data["origin"] == "player4":
-            print("Alright, now it's player1's turn")
+        if data["origin"] == id:
+            print("Alright, now it's player " +str(to_id)+ " turn")
             data["baton"] = True
             baton = False
             network.send_msg(sock, data, receiver)
@@ -123,7 +129,7 @@ while(True):
 
             # ++++++++++++++++++ Covering bet ++++++++++++++++++
             print("Covering bet! Now we have " +str(data["bet_value"] + 1)+ " chips on the table!")
-            data = network.create_package(data["origin"], "player4", int(data["bet_value"])+1, data["bet"], data["won"], data["chips"])
+            data = network.create_package(data["origin"], id, int(data["bet_value"])+1, data["bet"], data["won"], data["chips"])
             network.send_msg(sock, data, receiver)
             print("Waiting on the dices")
             # ++++++++++++++++++ Waits to roll the dices ++++++++++++++++++
@@ -137,7 +143,7 @@ while(True):
         data = network.receiv_msg(sock, receiver)  # Everyone decided covering or not
 
         # ++++++++++++++++++ Not covering it ++++++++++++++++++
-        if data["punter"] == "player4":
+        if data["punter"] == id:
 
             # ++++++++++++++++++ Our play ++++++++++++++++++ 
             print("Betting on a " + game.bet_name(data["bet"]) + " with " + str(data["bet_value"]) + " chips!")
@@ -147,7 +153,8 @@ while(True):
                 chips = chips + game.points(data["bet"])
                 print("You now have " +str(chips)+ " chips ;)")
                 print("------------- New round beginning, get set! -------------")
-                data = network.create_package(data["origin"], "player4", data["bet_value"], data["bet"], True, chips)
+                data = network.create_package(data["origin"], id, data["bet_value"], data["bet"], True, chips)
+                data["played"] = True
                 network.send_msg(sock, data, receiver)
 
             else:
@@ -155,32 +162,32 @@ while(True):
                 chips = chips - data["bet_value"]
                 if chips <= 0:
                     print("You have no chips left, that means you lost the game :(")
-                    data = network.create_package(data["origin"], "player4", data["bet_value"], data["bet"], False, chips)
+                    data = network.create_package(data["origin"], id, data["bet_value"], data["bet"], False, chips)
+                    data["played"] = True
                     network.send_msg(sock, data, receiver)
                     exit(0)
                 print("You now have " +str(chips)+ " chips ;)")
                 print("------------- New round beginning, get set! -------------")
-                data = network.create_package(data["origin"], "player4", data["bet_value"], data["bet"], False, chips)
+                data = network.create_package(data["origin"], id, data["bet_value"], data["bet"], False, chips)
+                data["played"] = True
                 network.send_msg(sock, data, receiver)
                 # ++++++++++++++++++ Send our play through the net ++++++++++++++++++
 
-            data = network.receiv_msg(sock, receiver)
-            network.send_msg(sock, data, receiver)
         else:
 
-            # ++++++++++++++++++ Their play ++++++++++++++++++
-            print(str(data["punter"])+ " is the punter! Waiting on the roll...")
-            network.send_msg(sock, data, receiver)
-        
-            data = network.receiv_msg(sock, receiver)
+            if data["played"] == True:
+                print(str(data["punter"])+ " Already played!")
+            else:
+                # ++++++++++++++++++ Their play ++++++++++++++++++
+                print(str(data["punter"])+ " is the punter! Waiting on the roll...")
+                network.send_msg(sock, data, receiver)
+                data = network.receiv_msg(sock, receiver)
             
             if data["won"] == True:
                 print("The punter won the bet! They have " +str(data["chips"])+ " chips.")
                 print("------------- New round beginning, get set! -------------")
-                network.send_msg(sock, data, receiver)
             else:
                 print("The punter lost the bet! They have " +str(data["chips"])+ " chips left.")
-                network.send_msg(sock, data, receiver)
                 if data["chips"] <= 0:
                     print("That's all, folks!")
                     exit(0)
@@ -188,7 +195,14 @@ while(True):
             # ++++++++++++++++++ Sends play through the net ++++++++++++++++++
 
         # ++++++++++++++++++ Receives baton ++++++++++++++++++
-        if data["origin"] == "player3":
-            data = network.receiv_msg(sock, receiver)
+        network.send_msg(sock, data, receiver)
+        data = network.receiv_msg(sock, receiver)
+
+        if id == 1:
+            prev = 4
+        else:
+            prev = id - 1
+
+        if data["origin"] == prev:
             baton = data["baton"]
         # ++++++++++++++++++ New round ++++++++++++++++++

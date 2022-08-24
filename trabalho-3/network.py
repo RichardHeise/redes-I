@@ -8,6 +8,7 @@ def create_package(origin, punter, bet_value, bet, won, chips):
     # ++ Creating dict with relevant values ++
     return {
         "init" : INIT_MARKER,
+        "played": False,
         "origin" : origin,
         "punter" : punter,
         "bet_value" : bet_value,

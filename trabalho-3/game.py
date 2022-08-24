@@ -46,7 +46,6 @@ def dicesResult(sorted_dices):
                 print("+PAIR+")
                 return PAIR
 
-
 def points(type):
   if type == 1:
     return int(PAIR)
