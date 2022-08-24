@@ -5,6 +5,7 @@ import json
 INIT_MARKER = 126
 
 def create_package(origin, punter, bet_value, bet, won, chips):
+    # ++ Creating dict with relevant values ++
     return {
         "init" : INIT_MARKER,
         "origin" : origin,
@@ -13,35 +14,42 @@ def create_package(origin, punter, bet_value, bet, won, chips):
         "bet" : bet,
         "won" : won,
         "chips" : chips,
-        "baton" : False
+        "baton" : False,
+        "parity" : 0  # Forced to zero
     }
 
 def send_msg(socket, data, receiver):
-    # parity = 0
+    parity = 0
 
-    # for i in range(0,len(json.dumps(data).encode("utf-8"))):
-    #     parity = json.dumps(data).encode("utf-8")[i]^parity
-        
-    # data["parity"] = parity
+    for i in range(0,len(json.dumps(data).encode("utf-8"))):
+        # Since data["parity"] is zero it has no effect on XOR
+        parity = json.dumps(data).encode("utf-8")[i]^parity 
+  
+    data["parity"] = parity # Temporary measure
 
-    to_send = json.dumps(data).encode("utf-8")
+    to_send = json.dumps(data).encode("utf-8") # to bits, serialized
 
     socket.sendto(to_send, receiver)
 
-def receiv_msg(socket):
+def receiv_msg(socket, receiver):
     while True:
-        data, trash = socket.recvfrom(1024)
+        # The 'trash' is the receiver of the tuple, useless here
+        data, trash = socket.recvfrom(1024) 
 
-        data = json.loads(data)
-        # parity = 0
+        data = json.loads(data) # Tries to load
+        if data["init"] == INIT_MARKER: # If valid we test parity
 
-        # for i in range(0,len(json.dumps(data).encode("utf-8"))):
-        #     parity = json.dumps(data).encode("utf-8")[i]^parity
+            rec_parity = data["parity"] # Original parity
+            data["parity"] = 0 # Zero so it has no effect on the XOR
+            parity = 0
 
-        # print(parity, data["parity"])
-        # if parity != data["parity"]:
-        #     print("Parity error")
-        #     exit(0)
-        
-        if data["init"] == INIT_MARKER:
+            for i in range(0,len(json.dumps(data).encode("utf-8"))):
+                # Since data["parity"] is zero it has no effect on XOR
+                parity = json.dumps(data).encode("utf-8")[i]^parity
+
+            if parity != rec_parity: 
+                print("Parity error. Shuting down network.")
+                send_msg(socket, data, receiver) # provoke parity error propagation
+                exit(0)
+            
             return data

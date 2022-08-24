@@ -12,38 +12,38 @@ FOAK = 8        # four of a kind
 YAHTZEE = 10    # "five of a kind"
 
 def dicesResult(sorted_dices):
+    print("The result is: ")
     if (2 in sorted_dices) and (3 in sorted_dices) and (4 in sorted_dices) and (5 in sorted_dices):
-        print("Straight:", end='')
         if (1 in sorted_dices):
-            print("small")
+            print("+SMALL STRAIGHT+")
             return SMALL_STR
         elif (6 in sorted_dices):
-            print("large")
+            print("+LARGE STRAIGHT+")
             return LARGE_STR
     else:
         for i in range(1,7):
             if (sorted_dices.count(i) == 5):
-                print("yahtzee")
+                print("+YAHTZEE!+")
                 return YAHTZEE
         for i in range(1,7):
             if (sorted_dices.count(i) == 4):
-                print("Four of a kind")
+                print("+FOUR OF A KIND+")
                 return FOAK
         for i in range(1,7):
             if (sorted_dices.count(i) == 3):
                 for j in range(1,7):
                     if (i != j) and (sorted_dices.count(j) == 2):
-                        print("full house")
+                        print("+FULL-HOUSE+")
                         return FULL_HOUSE
-                print("three of a kind")
+                print("+THREE OF A KIND+")
                 return TOAK
         for i in range(1,7):
             if (sorted_dices.count(i) == 2):
                 for j in range(1,7):
                     if (i != j) and (sorted_dices.count(j) == 2):
-                        print("two pairs")
+                        print("+TWO PAIRS+")
                         return TPAIRS
-                print("pair")
+                print("+PAIR+")
                 return PAIR
 
 
@@ -105,7 +105,6 @@ def rollDices():
         else:
             print("\n")
 
-    print("\n")
     result_values = [0,0,0,0,0]
 
     for w in range(0,5):
