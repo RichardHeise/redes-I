@@ -76,16 +76,21 @@ def rollDices():
     reroll_chances = 2
     print("Dices are rolling...")
     for i in range(1,4):
+        # which phase are we?
         print(str(i) + "º phase:")
 
+        # dice values
         for j in range(0,5):
             if dices[j]["roll"] == True:
                 dices[j]["roll"] = False
                 dices[j]["value"] = random.randint(1,6)
 
+            # print values
             print(str(dices[j]["value"]) + " ", end='')
 
+        # if there are no rerolls we just skip
         if reroll_chances != 0:
+            # rerolling
             print("\n")
             print("Reroll phase. Choose up to 5 dices to reroll.")
             print("You have " + str(reroll_chances) + " rerolls")
@@ -94,6 +99,7 @@ def rollDices():
             if str(rerolling) == '1':
                 dices_to_reroll = input("Use numbers from 1 to 5 separated by spaces\n")
 
+                # dices to reroll
                 for k in range(0, 5):
                     if str(k+1) in dices_to_reroll:
                         dices[k]["roll"] = True
@@ -104,12 +110,13 @@ def rollDices():
         else:
             print("\n")
 
+    # results gotta be sorted
     result_values = [0,0,0,0,0]
 
     for w in range(0,5):
-        result_values[w] = dices[w]["value"]
+        result_values[w] = dices[w]["value"] # getting results in ints
 
-    result_values.sort()
+    result_values.sort() # sorts
 
     return dicesResult(result_values)
 

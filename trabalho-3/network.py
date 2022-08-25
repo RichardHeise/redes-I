@@ -7,14 +7,14 @@ INIT_MARKER = 126
 def create_package(origin, punter, bet_value, bet, won, chips):
     # ++ Creating dict with relevant values ++
     return {
-        "init" : INIT_MARKER,
-        "origin" : origin,
-        "punter" : punter,
-        "bet_value" : bet_value,
-        "bet" : bet,
-        "won" : won,
-        "chips" : chips,
-        "baton" : False,
+        "init" : INIT_MARKER, # initial message marker
+        "origin" : origin,    # who holds the baton
+        "punter" : punter,    # who will play
+        "bet_value" : bet_value,  # how much chips were bet
+        "bet" : bet, # which combination is the bet
+        "won" : won, # did the punter won the bet?
+        "chips" : chips, # chips of current player
+        "baton" : False, # baton
         "parity" : 0  # Forced to zero
     }
 
