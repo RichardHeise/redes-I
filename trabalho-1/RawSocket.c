@@ -176,6 +176,8 @@ void reader(int socket, char* file, int* counter_seq, int* last_seq) {
         memset(data, 0, DATA_BYTES);
         if ( fread(data, sizeof(unsigned char), DATA_BYTES-1, reader) ) {
             send_msg(socket, data, SENDING, counter_seq);
+        } else {
+            break;
         }
 
         while(1) {
