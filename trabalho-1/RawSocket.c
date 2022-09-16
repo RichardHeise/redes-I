@@ -89,12 +89,10 @@ void inc_seq(int* counter) {
     *counter = ((*counter+1) % 16);
 }
 
-int unpack_msg(unsigned char* buf, int origin, int target, int* seq, int* last_seq, int type) {
+int unpack_msg(unsigned char* buf, int socket, int* seq, int* last_seq, int type) {
 
     msgHeader* header = (msgHeader *)(buf);
 
-    if (origin == target) return 0;
-    
     if (*last_seq == header->seq || type == header->type) {
         // fprintf(stderr, "\n++ ERRO NA SEQUÊNCIA ++\n");
         // print_msgHeader(header);

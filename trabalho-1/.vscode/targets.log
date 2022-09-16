@@ -1,4 +1,6 @@
 make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+make: *** No rule to make target '-lm', needed by 'server'.  Stop.
+
 # GNU Make 4.3
 # Built for x86_64-pc-linux-gnu
 # Copyright (C) 1988-2020 Free Software Foundation, Inc.
@@ -6,7 +8,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Fri Aug 12 15:40:21 2022
+# Make data base, printed on Mon Sep 12 10:58:09 2022
 
 # Variables
 
@@ -43,7 +45,7 @@ LSCOLORS = Gxfxcxdxbxegedabagacad
 # environment
 XDG_DATA_DIRS = /usr/share/cinnamon:/usr/share/gnome:/home/heise/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share:/var/lib/snapd/desktop
 # environment
-OLDPWD = /home/heise
+OLDPWD = /home/heise/redes-I
 # automatic
 ^D = $(patsubst %/,%,$(dir $^))
 # automatic
@@ -51,7 +53,7 @@ OLDPWD = /home/heise
 # environment
 NVM_INC = /home/heise/.nvm/versions/node/v17.7.1/include/node
 # environment
-VSCODE_CODE_CACHE_PATH = /home/heise/.config/Code/CachedData/6d9b74a70ca9c7733b29f0456fd8195364076dda
+VSCODE_CODE_CACHE_PATH = /home/heise/.config/Code/CachedData/784b0177c56c607789f9638da7b6bf3230d47a8c
 # environment
 XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session0
 # environment
@@ -63,7 +65,7 @@ XAUTHORITY = /home/heise/.Xauthority
 # default
 .INCLUDE_DIRS = /usr/local/include /usr/include /usr/include
 # environment
-GNOME_TERMINAL_SERVICE = :1.79
+GNOME_TERMINAL_SERVICE = :1.724
 # makefile
 MAKEFLAGS = pqrR
 # makefile
@@ -93,13 +95,13 @@ MAKEFILE_LIST := Makefile
 # environment
 ZSH = /home/heise/.oh-my-zsh
 # environment
-VSCODE_PID = 3981
+VSCODE_PID = 674965
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
 ?D = $(patsubst %/,%,$(dir $?))
 # environment
-SESSION_MANAGER = local/raven:@/tmp/.ICE-unix/2424,unix/raven:/tmp/.ICE-unix/2424
+SESSION_MANAGER = local/raven:@/tmp/.ICE-unix/2469,unix/raven:/tmp/.ICE-unix/2469
 # automatic
 *F = $(notdir $*)
 # environment
@@ -123,7 +125,7 @@ MAKECMDGOALS := all
 # environment
 SHLVL = 1
 # environment
-GNOME_TERMINAL_SCREEN = /org/gnome/Terminal/screen/4d42d656_47ef_4ae1_a0ab_f8e30787085a
+GNOME_TERMINAL_SCREEN = /org/gnome/Terminal/screen/2b4de463_c704_4089_bf64_8b1c862b9164
 # environment
 MAKELEVEL := 0
 # default
@@ -136,10 +138,10 @@ MAKEFILES :=
 LANGUAGE = pt_BR:pt:en
 # automatic
 ^F = $(notdir $^)
+# environment
+CINNAMON_VERSION = 5.4.12
 # automatic
 ?F = $(notdir $?)
-# environment
-DESKTOP_AUTOSTART_ID = 1039a2a848d58e6400166032945473043700000024240018
 # environment
 XDG_SEAT = seat0
 # environment
@@ -181,7 +183,7 @@ _ = /usr/bin/code
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # makefile (from 'Makefile', line 3)
-CFLAGS = -g -Wall
+CFLAGS = -g
 # environment
 GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
 # environment
@@ -199,7 +201,7 @@ HOME = /home/heise
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
-VSCODE_IPC_HOOK = /run/user/1000/vscode-f7028a01-1.70.1-main.sock
+VSCODE_IPC_HOOK = /run/user/1000/vscode-f7028a01-1.71.0-main.sock
 # environment
 TERM = xterm-256color
 # environment
@@ -225,7 +227,7 @@ CC = gcc
 # environment
 GDMSESSION = cinnamon
 # variable set hash-table stats:
-# Load=107/1024=10%, Rehash=0, Collisions=12/137=9%
+# Load=107/1024=10%, Rehash=0, Collisions=12/138=9%
 
 # Pattern-specific Variable Values
 
@@ -233,7 +235,7 @@ GDMSESSION = cinnamon
 
 # Directories
 
-# . (device 52, inode 42078741): 13 files, no impossibilities.
+# . (device 78, inode 37880377): 13 files, no impossibilities.
 
 # 13 files, no impossibilities in 1 directories.
 
@@ -245,28 +247,28 @@ GDMSESSION = cinnamon
 
 client: client.o RawSocket.o
 #  Implicit rule search has been done.
-#  Last modified 2022-08-12 15:39:57.941409891
+#  Last modified 2022-09-12 10:57:49.95536254
 #  File has been updated.
 #  Successfully updated.
 
 # Not a target:
 client.o:
 #  Implicit rule search has been done.
-#  Last modified 2022-08-12 15:39:57.941409891
+#  Last modified 2022-09-12 10:57:49.95536254
 #  File has been updated.
 #  Successfully updated.
 
 # Not a target:
 server.o:
 #  Implicit rule search has been done.
-#  Last modified 2022-08-12 15:39:57.941409891
+#  Last modified 2022-09-12 10:57:49.95936256
 #  File has been updated.
 #  Successfully updated.
 
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-08-12 15:39:57.937409743
+#  Last modified 2022-09-12 10:57:49.951362521
 #  File has been updated.
 #  Successfully updated.
 
@@ -277,17 +279,16 @@ clean:
 #  recipe to execute (from 'Makefile', line 22):
 	$(RM) *.o
 
-server: server.o RawSocket.o
+server: server.o RawSocket.o -lm
 #  Implicit rule search has been done.
-#  Last modified 2022-08-12 15:39:57.941409891
-#  File has been updated.
-#  Successfully updated.
+#  Last modified 2022-09-12 10:57:49.95936256
+#  File has not been updated.
 
 # Not a target:
- 
 RawSocket.o:
 #  Implicit rule search has been done.
-#  Last modified 2022-08-12 15:39:57.937409743
+ 
+#  Last modified 2022-09-12 10:57:49.95536254
 #  File has been updated.
 #  Successfully updated.
 
@@ -297,6 +298,12 @@ rClient: client
 #  File has not been updated.
 #  recipe to execute (from 'Makefile', line 10):
 	sudo ./client
+
+# Not a target:
+-lm:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has not been updated.
 
 rServer: server
 #  Implicit rule search has not been done.
@@ -315,8 +322,7 @@ all: client server
 #  Command line target.
 #  Implicit rule search has been done.
 #  File does not exist.
-#  File has been updated.
-#  Successfully updated.
+#  File has not been updated.
 
 purge:
 #  Implicit rule search has not been done.
@@ -326,19 +332,19 @@ purge:
 	$(RM) client server *.o
 
 # files hash-table stats:
-# Load=13/1024=1%, Rehash=0, Collisions=4/34=12%
+# Load=14/1024=1%, Rehash=0, Collisions=4/36=11%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 22 / storage = 191 B / avg = 8 B
-# current buf: size = 8162 B / used = 191 B / count = 22 / avg = 8 B
+# strcache buffers: 1 (0) / strings = 23 / storage = 195 B / avg = 8 B
+# current buf: size = 8162 B / used = 195 B / count = 23 / avg = 8 B
 
-# strcache performance: lookups = 44 / hit rate = 50%
+# strcache performance: lookups = 45 / hit rate = 48%
 # hash-table stats:
-# Load=22/8192=0%, Rehash=0, Collisions=0/44=0%
-# Finished Make data base on Fri Aug 12 15:40:21 2022
+# Load=23/8192=0%, Rehash=0, Collisions=0/45=0%
+# Finished Make data base on Mon Sep 12 10:58:09 2022
 
  
