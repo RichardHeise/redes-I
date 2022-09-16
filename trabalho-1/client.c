@@ -79,7 +79,6 @@ int choose_response(unsigned char* buf, int server) {
 
     switch (header->type) {
         case NACK:
-            fprintf(stderr, "ue");
             send_msg(server, 0, NACK, &counter_seq);
             return 1;
         case ERROR:
@@ -197,6 +196,14 @@ int get_type(unsigned char* buf, int *opts, unsigned char* dir) {
         strncpy(dir, opt1, 63);
         return RMKDIR;
     }
+    if(!strncmp("put", command, 6)){
+        strncpy(dir, opt1, 63);
+        return PUT;
+    }
+    if(!strncmp("get", command, 6)){
+        strncpy(dir, opt1, 63);
+        return GET;
+    }
     else
         return 0;
 }
@@ -204,7 +211,6 @@ int get_type(unsigned char* buf, int *opts, unsigned char* dir) {
 void client_controller(int server) {
     unsigned char* input = calloc(MAX_DATA_BYTES, sizeof(unsigned char));
     unsigned char* dir = calloc(MAX_DATA_BYTES, sizeof(unsigned char));
-    unsigned char* data = calloc(DATA_BYTES, sizeof(unsigned char));
 
     int type, ls_opts;
 
@@ -237,12 +243,14 @@ void client_controller(int server) {
             case MKDIR:
                 local_mkdir(dir);
                 break;
+            case PUT:
+                put(server, dir, &counter_seq , &last_seq);
+                break;
             default:
                 break;
         }
 
         memset(input, 0, MAX_DATA_BYTES);
-        memset(data, 0, DATA_BYTES);
     }
 }
 

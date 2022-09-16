@@ -164,3 +164,83 @@ int unpack_msg(unsigned char* buf, int socket, int* seq, int* last_seq, int type
     return 1;
 
 }
+
+void reader(int socket, char* file, int* counter_seq, int* last_seq) {
+
+    FILE *reader = fopen(file,"rb");
+    unsigned char* buf =  calloc(MAX_DATA_BYTES, sizeof(unsigned char));
+    unsigned char* data = calloc(DATA_BYTES, sizeof(unsigned char));
+    msgHeader* header = (msgHeader *)(buf);
+
+    while(!feof(reader)) {
+        memset(data, 0, DATA_BYTES);
+        if ( fread(data, sizeof(unsigned char), DATA_BYTES-1, reader) ) {
+            send_msg(socket, data, SENDING, counter_seq);
+        }
+
+        while(1) {
+            if ( recvfrom(socket, buf, MAX_DATA_BYTES, 0, NULL, 0) < 0) {
+                perror("Error while receiving data. Aborting\n");
+                exit(-2);
+            }
+
+            if (buf[0] == INIT_MARKER) {
+                
+                if ( unpack_msg(buf, socket, counter_seq, last_seq, 0) )  {
+                    fprintf(stderr, "Recebi o pacote.\n");
+                    int received = header->type; 
+                    if (received == ACK)
+
+                        break;
+
+                    else if (received == NACK) {
+
+                        if ((*counter_seq) == 0) {
+                            (*counter_seq) = 15;
+                        } else {
+                            (*counter_seq) -= 1;
+                        }
+
+                        if ((*last_seq) == 0) {
+                            (*last_seq) = 15;
+                        } else {
+                            (*last_seq) -= 1;
+                        }
+
+                        send_msg(socket, data, SENDING, counter_seq);
+                    }
+                }   
+            }
+        }
+    }
+    send_msg(socket, 0, END, counter_seq);
+
+    fclose(reader);
+    free(data);
+    free(buf);
+}
+
+void put(int dest, char* file, int* counter_seq,int* last_seq) {
+
+    send_msg(dest, file, PUT, counter_seq);
+
+    unsigned char* buf =  calloc(MAX_DATA_BYTES, sizeof(unsigned char));
+    msgHeader* header = (msgHeader *)(buf);
+
+    while(1) {
+        if ( recvfrom(dest, buf, MAX_DATA_BYTES, 0, NULL, 0) < 0) {
+            perror("Error while receiving data. Aborting\n");
+            exit(-2);
+        }
+
+        if (buf[0] == INIT_MARKER) {
+            if (header->type == ACK) {
+                break;
+            }
+        }
+    }
+    
+    reader(dest, file, counter_seq, last_seq);
+
+    free(buf);
+}

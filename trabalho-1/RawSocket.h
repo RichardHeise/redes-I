@@ -49,3 +49,7 @@ void send_msg(int socket, unsigned char* data, int type, int* seq);
 int unpack_msg(unsigned char* buf, int socket, int* seq, int* last_seq, int type);
 
 void inc_seq(int* counter);
+
+void put(int dest, char* file, int* counter_seq,int* last_seq);
+
+void reader(int socket, char* file, int* counter_seq, int* last_seq);
