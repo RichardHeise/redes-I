@@ -5,7 +5,6 @@
 #include <unistd.h> 
 #include <errno.h>
 #include <math.h>
-#include <time.h>
 
 int counter_seq = 0;
 int last_seq = 15;
@@ -103,7 +102,6 @@ void mkdir_server(unsigned char* buf, int client) {
 void put_server(unsigned char* buf, int socket) {
     msgHeader* header = (msgHeader *)(buf);
     unsigned char* name = (sizeof(msgHeader) + buf);
-
     FILE* writer = fopen(name, "w");
     
     while(1) {
@@ -115,14 +113,16 @@ void put_server(unsigned char* buf, int socket) {
         if (buf[0] == INIT_MARKER) {
             if ( unpack_msg(buf, socket, &counter_seq, &last_seq, ACK) )  {
                 if (header->type == SENDING) {
-                    fwrite(name, sizeof(unsigned char), DATA_BYTES, writer);
+                    print_msgHeader(header);
+                    fprintf(writer, "%s", buf+sizeof(msgHeader));
+                    send_msg(socket, 0, ACK, &counter_seq);
                 } else if (header->type == END) {
+                    send_msg(socket, 0, ACK, &counter_seq);
                     break;
-                } else {
-                    send_msg(socket, 0, NACK, &counter_seq);
                 }
             }
         }
+        send_msg(socket, 0, ACK, &counter_seq);
         memset(buf,0,MAX_DATA_BYTES);
     }
 
@@ -150,6 +150,8 @@ int choose_command(unsigned char* buf, int client) {
             fprintf(stderr, "Recebendo dados.");
             put_server(buf, client);
             break;
+        case GET:
+            put(client, buf+sizeof(msgHeader), &counter_seq, &last_seq);
         case ACK:
             return ACK;
         case NACK:
@@ -186,14 +188,8 @@ void server_controller(int client) {
 }
 
 int main () {
-    int client = ConexaoRawSocket("enp7s0f0");
+    int client = ConexaoRawSocket("eno1");
     //int client = ConexaoRawSocket("lo");
-
-    struct timeval tv;
-    tv.tv_sec = 1;
-    tv.tv_usec = 0;
-    setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
-    setsockopt(client, SOL_SOCKET, SO_SNDTIMEO, (const char*)&tv, sizeof tv);
 
     system("clear");
     fprintf(stderr, "Servidor inicializado, aguardando pacotes.\n");

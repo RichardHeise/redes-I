@@ -8,7 +8,7 @@ make: *** No rule to make target '-lm', needed by 'server'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Mon Sep 12 10:58:09 2022
+# Make data base, printed on Fri Sep 16 19:09:46 2022
 
 # Variables
 
@@ -17,9 +17,11 @@ GDK_BACKEND = x11
 # environment
 LC_ALL = C
 # environment
+GJS_DEBUG_OUTPUT = stderr
+# environment
 MANDATORY_PATH = /usr/share/gconf/cinnamon.mandatory.path
 # environment
-VSCODE_CWD = /home/heise/redes-I/trabalho-1
+VSCODE_CWD = /home/heise
 # environment
 NVM_DIR = /home/heise/.nvm
 # environment
@@ -27,11 +29,17 @@ GDM_LANG = pt_BR
 # default
 MAKE_COMMAND := make
 # environment
+rvm_user_install_flag = 1
+# environment
 GTK3_MODULES = xapp-gtk3-module
 # environment
 QT_ACCESSIBILITY = 1
+# environment
+rvm_bin_path = /home/heise/.rvm/bin
 # automatic
 @D = $(patsubst %/,%,$(dir $@))
+# environment
+rvm_loaded_flag = 1
 # environment
 VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 # default
@@ -45,11 +53,13 @@ LSCOLORS = Gxfxcxdxbxegedabagacad
 # environment
 XDG_DATA_DIRS = /usr/share/cinnamon:/usr/share/gnome:/home/heise/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share:/var/lib/snapd/desktop
 # environment
-OLDPWD = /home/heise/redes-I
+OLDPWD = /home/heise
 # automatic
 ^D = $(patsubst %/,%,$(dir $^))
 # automatic
 %F = $(notdir $%)
+# environment
+rvm_stored_umask = 002
 # environment
 NVM_INC = /home/heise/.nvm/versions/node/v17.7.1/include/node
 # environment
@@ -65,7 +75,7 @@ XAUTHORITY = /home/heise/.Xauthority
 # default
 .INCLUDE_DIRS = /usr/local/include /usr/include /usr/include
 # environment
-GNOME_TERMINAL_SERVICE = :1.724
+GEM_PATH = /home/heise/.rvm/gems/ruby-3.0.0:/home/heise/.rvm/gems/ruby-3.0.0@global
 # makefile
 MAKEFLAGS = pqrR
 # makefile
@@ -95,11 +105,13 @@ MAKEFILE_LIST := Makefile
 # environment
 ZSH = /home/heise/.oh-my-zsh
 # environment
-VSCODE_PID = 674965
+VSCODE_PID = 1182969
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
 ?D = $(patsubst %/,%,$(dir $?))
+# environment
+MY_RUBY_HOME = /home/heise/.rvm/rubies/ruby-3.0.0
 # environment
 SESSION_MANAGER = local/raven:@/tmp/.ICE-unix/2469,unix/raven:/tmp/.ICE-unix/2469
 # automatic
@@ -123,15 +135,17 @@ SHELL = /bin/sh
 # default
 MAKECMDGOALS := all
 # environment
-SHLVL = 1
+GJS_DEBUG_TOPICS = JS ERROR;JS LOG
 # environment
-GNOME_TERMINAL_SCREEN = /org/gnome/Terminal/screen/2b4de463_c704_4089_bf64_8b1c862b9164
+SHLVL = 0
+# environment
+rvm_path = /home/heise/.rvm
 # environment
 MAKELEVEL := 0
 # default
 MAKE = $(MAKE_COMMAND)
 # environment
-PATH = /home/heise/.cabal/bin:/home/heise/.ghcup/bin:/home/heise/.nvm/versions/node/v17.7.1/bin:/home/heise/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/heise/.rvm/bin:/home/heise/.rvm/bin
+PATH = /home/heise/.cabal/bin:/home/heise/.ghcup/bin:/home/heise/.nvm/versions/node/v17.7.1/bin:/home/heise/.rvm/gems/ruby-3.0.0/bin:/home/heise/.rvm/gems/ruby-3.0.0@global/bin:/home/heise/.rvm/rubies/ruby-3.0.0/bin:/home/heise/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/heise/.rvm/bin:/home/heise/.rvm/bin
 # default
 MAKEFILES := 
 # environment
@@ -147,7 +161,7 @@ XDG_SEAT = seat0
 # environment
 XDG_CURRENT_DESKTOP = X-Cinnamon
 # environment
-LS_COLORS = rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:
+LS_COLORS = 
 # automatic
 +F = $(notdir $+)
 # environment
@@ -158,14 +172,20 @@ LESS = -R
 DESKTOP_SESSION = cinnamon
 # environment
 ORIGINAL_XDG_CURRENT_DESKTOP = X-Cinnamon
+# environment
+IRBRC = /home/heise/.rvm/rubies/ruby-3.0.0/.irbrc
 # 'override' directive
 GNUMAKEFLAGS := 
 # environment
 LOGNAME = heise
 # environment
+GIO_LAUNCHED_DESKTOP_FILE = /usr/share/applications/code.desktop
+# environment
 XDG_VTNR = 7
 # makefile
 .DEFAULT_GOAL := all
+# environment
+rvm_version = 1.29.12 (latest)
 # environment
 DISPLAY = :0
 # environment
@@ -177,17 +197,19 @@ DEFAULTS_PATH = /usr/share/gconf/cinnamon.default.path
 # default
 MAKE_VERSION := 4.3
 # environment
+GIO_LAUNCHED_DESKTOP_FILE_PID = 1182969
+# environment
 PAGER = less
 # environment
-_ = /usr/bin/code
+_ = /usr/share/code/code
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
+# environment
+GEM_HOME = /home/heise/.rvm/gems/ruby-3.0.0
 # makefile (from 'Makefile', line 3)
 CFLAGS = -g
 # environment
 GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
-# environment
-COLORTERM = truecolor
 # environment
 GTK_OVERLAY_SCROLLING = 1
 # environment
@@ -203,8 +225,6 @@ ELECTRON_RUN_AS_NODE = 1
 # environment
 VSCODE_IPC_HOOK = /run/user/1000/vscode-f7028a01-1.71.0-main.sock
 # environment
-TERM = xterm-256color
-# environment
 XDG_SESSION_ID = c2
 # default
 .RECIPEPREFIX := 
@@ -213,21 +233,19 @@ XDG_SESSION_ID = c2
 # default
 SUFFIXES := 
 # environment
-VSCODE_CLI = 1
-# environment
-ELECTRON_NO_ATTACH_CONSOLE = 1
-# environment
-VTE_VERSION = 6800
-# environment
 XDG_GREETER_DATA_DIR = /var/lib/lightdm-data/heise
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
 # makefile (from 'Makefile', line 4)
 CC = gcc 
 # environment
+rvm_prefix = /home/heise
+# environment
+RUBY_VERSION = ruby-3.0.0
+# environment
 GDMSESSION = cinnamon
 # variable set hash-table stats:
-# Load=107/1024=10%, Rehash=0, Collisions=12/138=9%
+# Load=116/1024=11%, Rehash=0, Collisions=9/147=6%
 
 # Pattern-specific Variable Values
 
@@ -235,9 +253,9 @@ GDMSESSION = cinnamon
 
 # Directories
 
-# . (device 78, inode 37880377): 13 files, no impossibilities.
+# . (device 78, inode 37880377): 15 files, no impossibilities.
 
-# 13 files, no impossibilities in 1 directories.
+# 15 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -247,21 +265,22 @@ GDMSESSION = cinnamon
 
 client: client.o RawSocket.o
 #  Implicit rule search has been done.
-#  Last modified 2022-09-12 10:57:49.95536254
+#  Last modified 2022-09-16 18:58:14.836599309
 #  File has been updated.
 #  Successfully updated.
 
 # Not a target:
 client.o:
 #  Implicit rule search has been done.
-#  Last modified 2022-09-12 10:57:49.95536254
+#  Last modified 2022-09-16 18:58:14.78059883
 #  File has been updated.
 #  Successfully updated.
 
 # Not a target:
 server.o:
 #  Implicit rule search has been done.
-#  Last modified 2022-09-12 10:57:49.95936256
+#  Last modified 2022-09-16 18:36:51.70020657
+ 
 #  File has been updated.
 #  Successfully updated.
 
@@ -281,14 +300,13 @@ clean:
 
 server: server.o RawSocket.o -lm
 #  Implicit rule search has been done.
-#  Last modified 2022-09-12 10:57:49.95936256
+#  File does not exist.
 #  File has not been updated.
 
 # Not a target:
 RawSocket.o:
 #  Implicit rule search has been done.
- 
-#  Last modified 2022-09-12 10:57:49.95536254
+#  Last modified 2022-09-16 18:58:14.816599138
 #  File has been updated.
 #  Successfully updated.
 
@@ -339,12 +357,12 @@ purge:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 23 / storage = 195 B / avg = 8 B
-# current buf: size = 8162 B / used = 195 B / count = 23 / avg = 8 B
+# strcache buffers: 1 (0) / strings = 26 / storage = 212 B / avg = 8 B
+# current buf: size = 8162 B / used = 212 B / count = 26 / avg = 8 B
 
-# strcache performance: lookups = 45 / hit rate = 48%
+# strcache performance: lookups = 47 / hit rate = 44%
 # hash-table stats:
-# Load=23/8192=0%, Rehash=0, Collisions=0/45=0%
-# Finished Make data base on Mon Sep 12 10:58:09 2022
+# Load=26/8192=0%, Rehash=0, Collisions=0/47=0%
+# Finished Make data base on Fri Sep 16 19:09:46 2022
 
  

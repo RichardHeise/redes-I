@@ -209,6 +209,52 @@ int get_type(unsigned char* buf, int *opts, unsigned char* dir) {
         return 0;
 }
 
+void get(unsigned char* buf, int socket) {
+
+    msgHeader* header = (msgHeader *)(buf);
+
+    while(1) {
+        if ( recvfrom(socket, buf, MAX_DATA_BYTES, 0, NULL, 0) < 0) {
+            perror("Error while receiving data. Aborting\n");
+            exit(-2);
+        }
+
+        if (buf[0] == INIT_MARKER) {
+            if (header->type == PUT) {
+                send_msg(socket, 0, ACK, &counter_seq);
+                break;
+            }
+        }
+        memset(buf, 0, MAX_DATA_BYTES);
+    }
+
+    unsigned char* name = (sizeof(msgHeader) + buf);
+    FILE* writer = fopen(name, "w");
+    
+    while(1) {
+        if ( recvfrom(socket, buf, MAX_DATA_BYTES, 0, NULL, 0) < 0) {
+            perror("Error while receiving data. Aborting\n");
+            exit(-2);
+        }
+
+        if (buf[0] == INIT_MARKER) {
+            if ( unpack_msg(buf, socket, &counter_seq, &last_seq, ACK) )  {
+                if (header->type == SENDING) {
+                    fprintf(writer, "%s", buf+sizeof(msgHeader));
+                    send_msg(socket, 0, ACK, &counter_seq);
+                } else if (header->type == END) {
+                    send_msg(socket, 0, ACK, &counter_seq);
+                    break;
+                } 
+            }
+        }
+        send_msg(socket, 0, ACK, &counter_seq);
+        memset(buf,0,MAX_DATA_BYTES);
+    }
+
+    fclose(writer);
+}
+
 void client_controller(int server) {
     unsigned char* input = calloc(MAX_DATA_BYTES, sizeof(unsigned char));
     unsigned char* dir = calloc(MAX_DATA_BYTES, sizeof(unsigned char));
@@ -246,6 +292,10 @@ void client_controller(int server) {
                 break;
             case PUT:
                 put(server, dir, &counter_seq , &last_seq);
+                break;
+            case GET:
+                send_msg(server, dir, GET, &counter_seq);
+                get(dir, server);
                 break;
             default:
                 break;

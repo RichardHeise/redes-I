@@ -7,13 +7,13 @@ int ConexaoRawSocket(char *device) {
     struct sockaddr_ll endereco;
     struct packet_mreq mr;
 
-    soquete = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));  	/*cria socket*/
+    soquete = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));  	/cria socket/
     if (soquete == -1) {
         printf("Erro no Socket\n");
         exit(-1);
     }
 
-    memset(&ir, 0, sizeof(struct ifreq));  	/*dispositivo eth0*/
+    memset(&ir, 0, sizeof(struct ifreq));  	/dispositivo eth0/
     memcpy(ir.ifr_name, device, sizeof(device));
     if (ioctl(soquete, SIOCGIFINDEX, &ir) == -1) {
         printf("Erro no ioctl\n");
@@ -21,7 +21,7 @@ int ConexaoRawSocket(char *device) {
     }
         
 
-    memset(&endereco, 0, sizeof(endereco)); 	/*IP do dispositivo*/
+    memset(&endereco, 0, sizeof(endereco)); 	/IP do dispositivo/
     endereco.sll_family = AF_PACKET;
     endereco.sll_protocol = htons(ETH_P_ALL);
     endereco.sll_ifindex = ir.ifr_ifindex;
@@ -31,7 +31,7 @@ int ConexaoRawSocket(char *device) {
     }
 
 
-    memset(&mr, 0, sizeof(mr));          /*Modo Promiscuo*/
+    memset(&mr, 0, sizeof(mr));          /Modo Promiscuo/
     mr.mr_ifindex = ir.ifr_ifindex;
     mr.mr_type = PACKET_MR_PROMISC;
     if (setsockopt(soquete, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mr, sizeof(mr)) == -1)	{
@@ -94,19 +94,6 @@ int unpack_msg(unsigned char* buf, int socket, int* seq, int* last_seq, int type
     msgHeader* header = (msgHeader *)(buf);
 
     if (*last_seq == header->seq || type == header->type) {
-        // fprintf(stderr, "\n++ ERRO NA SEQUÊNCIA ++\n");
-        // print_msgHeader(header);
-        // for (int i = 0; i < header->size; i++) {
-        // unsigned char d = (((unsigned char*)(header)) + sizeof(msgHeader))[i];
-        //     if (d < 0x20) {
-        //         fprintf(stderr,"[%d]", d);
-        //     } else {
-        //         fprintf(stderr,"'%c'", d);
-        //     }
-        // }
-        // fprintf(stderr,"\n");
-        // fprintf(stderr, "last_seq: %d\n", *last_seq);
-        // fprintf(stderr, "++ FIM ++\n");
         return 0;
     }
 
@@ -118,21 +105,6 @@ int unpack_msg(unsigned char* buf, int socket, int* seq, int* last_seq, int type
     }
     
     if (parity != buf[MAX_DATA_BYTES-1]) {
-        // fprintf(stderr, "\n++ ERRO NA PARIDADE ++\n");
-        // print_msgHeader(header);
-        // for (int i = 0; i < header->size; i++) {
-        // unsigned char d = (((unsigned char*)(header)) + sizeof(msgHeader))[i];
-        //     if (d < 0x20) {
-        //         fprintf(stderr,"[%d]", d);
-        //     } else {
-        //         fprintf(stderr,"'%c'", d);
-        //     }
-        // }
-        // fprintf(stderr,"\n");
-        // fprintf(stderr, "paridade buf: %d\n", buf[MAX_DATA_BYTES-1]);
-        // fprintf(stderr, "++ FIM ++\n");
-        // fprintf(stderr, "partidade: %d\n", parity);
-        fprintf(stderr, "aqui?\n");
         send_msg(socket, NULL, NACK, seq);
         return 0;
     }
@@ -142,19 +114,6 @@ int unpack_msg(unsigned char* buf, int socket, int* seq, int* last_seq, int type
     inc_seq(&shouldBe_seq);
 
     if ( header->seq != shouldBe_seq ) {
-        // fprintf(stderr, "\n++ ERRO NA SEQ QUE DEVERIA SER ++\n");
-        // print_msgHeader(header);
-        // for (int i = 0; i < header->size; i++) {
-        // unsigned char d = (((unsigned char*)(header)) + sizeof(msgHeader))[i];
-        //     if (d < 0x20) {
-        //         fprintf(stderr,"[%d]", d);
-        //     } else {
-        //         fprintf(stderr,"'%c'", d);
-        //     }
-        // }
-        // fprintf(stderr,"\n");
-        // fprintf(stderr, "seq: %d\n", shouldBe_seq);
-        // fprintf(stderr, "++ FIM ++\n");
         send_msg(socket, NULL, NACK, seq);
         return 0;
     }
@@ -211,7 +170,7 @@ void reader(int socket, char* file, int* counter_seq, int* last_seq) {
 
                         send_msg(socket, data, SENDING, counter_seq);
                     }
-                }   
+                } 
             }
         }
     }
@@ -227,6 +186,7 @@ void put(int dest, char* file, int* counter_seq,int* last_seq) {
     send_msg(dest, file, PUT, counter_seq);
 
     unsigned char* buf =  calloc(MAX_DATA_BYTES, sizeof(unsigned char));
+    msgHeader* header = (msgHeader *)(buf);
 
     while(1) {
         if ( recvfrom(dest, buf, MAX_DATA_BYTES, 0, NULL, 0) < 0) {
@@ -235,7 +195,6 @@ void put(int dest, char* file, int* counter_seq,int* last_seq) {
         }
 
         if (buf[0] == INIT_MARKER) {
-            msgHeader* header = (msgHeader *)(buf);
             if (header->type == ACK) {
                 break;
             }
