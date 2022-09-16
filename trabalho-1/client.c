@@ -11,10 +11,9 @@ int last_seq = 15;
 int ls_response(unsigned char* buf, int socket) {
     msgHeader* header = (msgHeader*)(buf);
 
-    print_msgHeader(header);
-
     switch (header->type) {
         case SENDING:
+            send_msg(socket, 0, ACK, &counter_seq);
             fprintf(stderr, "%s", (buf + sizeof(msgHeader)) );
             break;
         case END:

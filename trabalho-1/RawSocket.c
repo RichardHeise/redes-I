@@ -142,24 +142,24 @@ int unpack_msg(unsigned char* buf, int socket, int* seq, int* last_seq, int type
     inc_seq(&shouldBe_seq);
 
     if ( header->seq != shouldBe_seq ) {
-        fprintf(stderr, "\n++ ERRO NA SEQ QUE DEVERIA SER ++\n");
-        print_msgHeader(header);
-        for (int i = 0; i < header->size; i++) {
-        unsigned char d = (((unsigned char*)(header)) + sizeof(msgHeader))[i];
-            if (d < 0x20) {
-                fprintf(stderr,"[%d]", d);
-            } else {
-                fprintf(stderr,"'%c'", d);
-            }
-        }
-        fprintf(stderr,"\n");
-        fprintf(stderr, "seq: %d\n", shouldBe_seq);
-        fprintf(stderr, "++ FIM ++\n");
+        // fprintf(stderr, "\n++ ERRO NA SEQ QUE DEVERIA SER ++\n");
+        // print_msgHeader(header);
+        // for (int i = 0; i < header->size; i++) {
+        // unsigned char d = (((unsigned char*)(header)) + sizeof(msgHeader))[i];
+        //     if (d < 0x20) {
+        //         fprintf(stderr,"[%d]", d);
+        //     } else {
+        //         fprintf(stderr,"'%c'", d);
+        //     }
+        // }
+        // fprintf(stderr,"\n");
+        // fprintf(stderr, "seq: %d\n", shouldBe_seq);
+        // fprintf(stderr, "++ FIM ++\n");
         send_msg(socket, NULL, NACK, seq);
         return 0;
     }
 
-    fprintf(stderr, "\n\nseq atual: %d\nlast seq: %d\n\n", header->seq, *last_seq);
+    // fprintf(stderr, "\n\nseq atual: %d\nlast seq: %d\n\n", header->seq, *last_seq);
     *last_seq = header->seq;
     return 1;
 

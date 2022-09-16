@@ -9,6 +9,58 @@
 int counter_seq = 0;
 int last_seq = 15;
 
+int choose_command(unsigned char* buf, int client);
+
+void reader(int socket,  unsigned char* buf, unsigned char* data, char* file) {
+    FILE *reader = fopen(file,"rb");
+
+    while(!feof(reader)) {
+        memset(data, 0, DATA_BYTES);
+        if ( fread(data, sizeof(unsigned char), DATA_BYTES-1, reader) ) {
+            send_msg(socket, data, SENDING, &counter_seq);
+        }
+
+        while(1) {
+            if ( recvfrom(socket, buf, MAX_DATA_BYTES, 0, NULL, 0) < 0) {
+                perror("Error while receiving data. Aborting\n");
+                exit(-2);
+            }
+
+            if (buf[0] == INIT_MARKER) {
+                
+                if ( unpack_msg(buf, socket, &counter_seq, &last_seq, 0) )  {
+                    fprintf(stderr, "Recebi o pacote.\n");
+                    int received = choose_command(buf, socket); 
+                    if (received == ACK)
+
+                        break;
+
+                    else if (received == NACK) {
+
+                        if (counter_seq == 0) {
+                            counter_seq = 15;
+                        } else {
+                            counter_seq -= 1;
+                        }
+
+                        if (last_seq == 0) {
+                            last_seq = 15;
+                        } else {
+                            last_seq -= 1;
+                        }
+
+                        send_msg(socket, data, SENDING, &counter_seq);
+                    }
+                }   
+            }
+        }
+    }
+    send_msg(socket, 0, END, &counter_seq);
+
+    fclose(reader);
+    system("rm -f file");
+}
+
 void ls_server(unsigned char* buf, int client) {
 
     msgHeader* header = (msgHeader *)(buf);
@@ -26,52 +78,9 @@ void ls_server(unsigned char* buf, int client) {
 
     unsigned char* data = calloc(DATA_BYTES, sizeof(unsigned char));
 
-    FILE *reader = fopen("/tmp/saida.txt","rb");
-
-    while(!feof(reader)) {
-        memset(data, 0, DATA_BYTES);
-        if ( fread(data, sizeof(unsigned char), DATA_BYTES-1, reader) ) {
-            send_msg(client, data, SENDING, &counter_seq);
-        }
-
-        while(1) {
-            if ( recvfrom(client, buf, MAX_DATA_BYTES, 0, NULL, 0) < 0) {
-                perror("Error while receiving data. Aborting\n");
-                exit(-2);
-            }
-
-            if (buf[0] == INIT_MARKER) {
-                
-                if ( unpack_msg(buf, client, &counter_seq, &last_seq, 0) )  {
-                    fprintf(stderr, "Recebi o pacote.\n");
-                    int received = choose_command(buf, client); 
-                    if (received == ACK)
-                        break;
-                    else if (received == NACK) {
-                        if (counter_seq == 0) {
-                            counter_seq = 15;
-                        } else {
-                            counter_seq -= 1;
-                        }
-
-                        if (last_seq == 0) {
-                            last_seq = 15;
-                        } else {
-                            last_seq -= 1;
-                        }
-
-                        send_msg(client, data, SENDING, &counter_seq);
-                    }
-                }   
-            }
-        }
-    }
-    rewind(reader);
-    send_msg(client, 0, END, &counter_seq);
-
-    fclose(reader);
+    reader(client, buf, data, "/tmp/saida.txt");
+    
     free(data);
-    // system("rm -f /tmp/saida.txt");
 }
 
 void cd_server(unsigned char* buf, int client) {
@@ -160,9 +169,9 @@ int choose_command(unsigned char* buf, int client) {
             ls_server(buf, client);
             break;
         case ACK:
-            return ACK
+            return ACK;
         case NACK:
-            return NACK
+            return NACK;
         default:
             break;
     }
