@@ -33,6 +33,38 @@ void ls_server(unsigned char* buf, int client) {
         if ( fread(data, sizeof(unsigned char), DATA_BYTES-1, reader) ) {
             send_msg(client, data, SENDING, &counter_seq);
         }
+
+        while(1) {
+            if ( recvfrom(client, buf, MAX_DATA_BYTES, 0, NULL, 0) < 0) {
+                perror("Error while receiving data. Aborting\n");
+                exit(-2);
+            }
+
+            if (buf[0] == INIT_MARKER) {
+                
+                if ( unpack_msg(buf, client, &counter_seq, &last_seq, 0) )  {
+                    fprintf(stderr, "Recebi o pacote.\n");
+                    int received = choose_command(buf, client); 
+                    if (received == ACK)
+                        break;
+                    else if (received == NACK) {
+                        if (counter_seq == 0) {
+                            counter_seq = 15;
+                        } else {
+                            counter_seq -= 1;
+                        }
+
+                        if (last_seq == 0) {
+                            last_seq = 15;
+                        } else {
+                            last_seq -= 1;
+                        }
+
+                        send_msg(client, data, SENDING, &counter_seq);
+                    }
+                }   
+            }
+        }
     }
     rewind(reader);
     send_msg(client, 0, END, &counter_seq);
@@ -111,7 +143,7 @@ void mkdir_server(unsigned char* buf, int client) {
     }
 }
 
-void choose_command(unsigned char* buf, int client) {
+int choose_command(unsigned char* buf, int client) {
     msgHeader* header = (msgHeader*)(buf);
     
     switch (header->type) {
@@ -127,9 +159,15 @@ void choose_command(unsigned char* buf, int client) {
             fprintf(stderr, "Executando um ls remoto.\n");
             ls_server(buf, client);
             break;
+        case ACK:
+            return ACK
+        case NACK:
+            return NACK
         default:
             break;
     }
+
+    return 0;
 }
 
 void server_controller(int client) {
@@ -157,8 +195,8 @@ void server_controller(int client) {
 }
 
 int main () {
-    // int client = ConexaoRawSocket("enp7s0f0");
-    int client = ConexaoRawSocket("lo");
+    int client = ConexaoRawSocket("enp7s0f0");
+    //int client = ConexaoRawSocket("lo");
 
     system("clear");
     fprintf(stderr, "Servidor inicializado, aguardando pacotes.\n");

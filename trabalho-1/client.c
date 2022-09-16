@@ -249,8 +249,8 @@ void client_controller(int server) {
 
 int main () {
 
-    // int server = ConexaoRawSocket("enp7s0f0");
-    int server = ConexaoRawSocket("lo");
+    int server = ConexaoRawSocket("enp7s0f0");
+    // int server = ConexaoRawSocket("lo");
 
     if (server < 0) {
         perror("Error while creating socket, aborting.\n");
