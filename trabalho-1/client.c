@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <unistd.h> 
 #include <errno.h>
+#include <time.h>
 
 int counter_seq = 0;
 int last_seq = 15;
@@ -263,6 +264,12 @@ int main () {
         perror("Error while creating socket, aborting.\n");
         exit(-1);
     }
+
+    struct timeval tv;
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
+    setsockopt(server, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+    setsockopt(server, SOL_SOCKET, SO_SNDTIMEO, (const char*)&tv, sizeof tv);
     
     system("clear");
     client_controller(server);

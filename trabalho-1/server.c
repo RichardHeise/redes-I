@@ -5,6 +5,7 @@
 #include <unistd.h> 
 #include <errno.h>
 #include <math.h>
+#include <time.h>
 
 int counter_seq = 0;
 int last_seq = 15;
@@ -187,6 +188,12 @@ void server_controller(int client) {
 int main () {
     int client = ConexaoRawSocket("enp7s0f0");
     //int client = ConexaoRawSocket("lo");
+
+    struct timeval tv;
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
+    setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+    setsockopt(client, SOL_SOCKET, SO_SNDTIMEO, (const char*)&tv, sizeof tv);
 
     system("clear");
     fprintf(stderr, "Servidor inicializado, aguardando pacotes.\n");

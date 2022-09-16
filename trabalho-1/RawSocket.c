@@ -227,7 +227,6 @@ void put(int dest, char* file, int* counter_seq,int* last_seq) {
     send_msg(dest, file, PUT, counter_seq);
 
     unsigned char* buf =  calloc(MAX_DATA_BYTES, sizeof(unsigned char));
-    msgHeader* header = (msgHeader *)(buf);
 
     while(1) {
         if ( recvfrom(dest, buf, MAX_DATA_BYTES, 0, NULL, 0) < 0) {
@@ -236,6 +235,7 @@ void put(int dest, char* file, int* counter_seq,int* last_seq) {
         }
 
         if (buf[0] == INIT_MARKER) {
+            msgHeader* header = (msgHeader *)(buf);
             if (header->type == ACK) {
                 break;
             }
